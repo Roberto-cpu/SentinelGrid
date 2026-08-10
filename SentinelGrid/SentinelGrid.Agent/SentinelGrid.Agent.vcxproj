@@ -28,12 +28,14 @@
     <ClInclude Include="include\agent\codecs\event_codec.h" />
     <ClInclude Include="include\agent\codecs\security_event.h" />
     <ClInclude Include="include\agent\protocols\packet_codec.h" />
+    <ClInclude Include="include\agent\sockets\tcp_client.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\collections\buffer_codec.c" />
     <ClCompile Include="src\domains\security_event.c" />
     <ClCompile Include="src\protocols\event_codec.c" />
     <ClCompile Include="src\protocols\packet_codec.c" />
+    <ClCompile Include="src\sockets\tcp_client.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

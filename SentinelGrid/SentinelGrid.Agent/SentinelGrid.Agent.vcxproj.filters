@@ -29,6 +29,9 @@
     <ClInclude Include="include\agent\protocols\packet_codec.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="include\agent\sockets\tcp_client.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\collections\buffer_codec.c">
@@ -41,6 +44,9 @@
       <Filter>File di origine\libs\codecs</Filter>
     </ClCompile>
     <ClCompile Include="src\protocols\packet_codec.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sockets\tcp_client.c">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

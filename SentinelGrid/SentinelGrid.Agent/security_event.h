@@ -1,0 +1,45 @@
+#ifndef SECURITY_EVENT_H
+#define SECURITY_EVENT_H
+
+#include <stdint.h>
+
+/*
+ * @brief enumerates the security event types, mapping them with a numerical value:
+ *
+ * - EVENT_HEARTBEAT: 1 -> to check if the agent is still alive
+ * - EVENT_SERVICE_STOP: 2 -> to indicate the agent shutdown process
+ * - EVENT_LOGIN_FAILED: 3 -> to log when the agent login attemp fails
+ */
+typedef enum {
+	EVENT_HEARTBEAT = 1,
+	EVENT_SERVICE_STOP = 2,
+	EVENT_LOGIN_FAILED = 3
+} EventType;
+
+/*
+ * @brief Defines the data associated to a security event
+ * @param agent_id: the identifier of the agent who raise the event
+ * @param sequence_number: the log numerical identifier
+ * @param type: the event type identifier
+ */
+typedef struct {
+	uint32_t agent_id;
+	uint64_t sequence_number;
+	EventType type;
+} SecurityEvent;
+
+/* 
+ * @brief Checks if the given event type is enumerated
+ * @param type: the event to check
+ * @returns 1 if the type is valid; 0 otherwise
+ */
+int isValidEventType(EventType type);
+
+/*
+ * @brief Displays the given event type meanings
+ * @param type: the event to display
+ * @returns: the associated string
+ */
+const char* eventTypeToString(EventType type);
+
+#endif // !SECURITY_EVENT_H

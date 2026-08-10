@@ -1,5 +1,5 @@
-#include "buffer_codec.h"
-#include "event_codec.h"
+#include "../../include/agent/codecs/buffer_codec.h"
+#include "../../include/agent/codecs/event_codec.h"
 
 #include <stdint.h>
 #include <stdlib.h>

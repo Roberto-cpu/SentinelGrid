@@ -19,14 +19,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="buffer_codec.h" />
-    <ClInclude Include="event_codec.h" />
-    <ClInclude Include="security_event.h" />
+    <ClInclude Include="include\agent\codecs\buffer_codec.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="include\agent\codecs\event_codec.h" />
+    <ClInclude Include="include\agent\codecs\security_event.h" />
+    <ClInclude Include="include\agent\protocols\packet_codec.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="buffer_codec.c" />
-    <ClCompile Include="event_codec.c" />
-    <ClCompile Include="security_event.c" />
+    <ClCompile Include="src\collections\buffer_codec.c" />
+    <ClCompile Include="src\domains\security_event.c" />
+    <ClCompile Include="src\protocols\event_codec.c" />
+    <ClCompile Include="src\protocols\packet_codec.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
@@ -34,6 +41,7 @@
     <ProjectGuid>{ccbf1dfb-9931-4096-ac7f-8a6a8a614290}</ProjectGuid>
     <RootNamespace>SentinelGridAgent</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>SentinelGrid.Agent</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -15,30 +15,33 @@
     <Filter Include="File di origine\libs\codecs">
       <UniqueIdentifier>{0b7edd67-8f35-4d26-8a36-1f09094018bb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="File di origine\libs\entities">
-      <UniqueIdentifier>{cb4d6460-e359-4f9c-8727-f571d25726b7}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="event_codec.h">
+    <ClInclude Include="include\agent\codecs\buffer_codec.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="security_event.h">
+    <ClInclude Include="include\agent\codecs\event_codec.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="buffer_codec.h">
+    <ClInclude Include="include\agent\codecs\security_event.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="include\agent\protocols\packet_codec.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="buffer_codec.c">
+    <ClCompile Include="src\collections\buffer_codec.c">
       <Filter>File di origine\libs\codecs</Filter>
     </ClCompile>
-    <ClCompile Include="event_codec.c">
+    <ClCompile Include="src\protocols\event_codec.c">
       <Filter>File di origine\libs\codecs</Filter>
     </ClCompile>
-    <ClCompile Include="security_event.c">
-      <Filter>File di origine\libs\entities</Filter>
+    <ClCompile Include="src\domains\security_event.c">
+      <Filter>File di origine\libs\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\protocols\packet_codec.c">
+      <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

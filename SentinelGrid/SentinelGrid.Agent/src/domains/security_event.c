@@ -1,4 +1,4 @@
-#include "security_event.h"
+#include "../../include/agent/codecs/security_event.h"
 
 int isValidEventType(EventType type) {
 	return type == EVENT_HEARTBEAT || 

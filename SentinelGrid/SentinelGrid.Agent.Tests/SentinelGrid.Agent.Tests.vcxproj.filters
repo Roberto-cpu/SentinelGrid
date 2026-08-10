@@ -15,28 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\SentinelGrid.Agent\buffer_codec.c">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\SentinelGrid.Agent\event_codec.c">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\SentinelGrid.Agent\security_event.c">
-      <Filter>File di origine</Filter>
-    </ClCompile>
     <ClCompile Include="test_main.c">
       <Filter>File di origine</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\SentinelGrid.Agent\buffer_codec.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SentinelGrid.Agent\event_codec.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SentinelGrid.Agent\security_event.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

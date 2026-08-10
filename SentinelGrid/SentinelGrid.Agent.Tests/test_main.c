@@ -4,6 +4,7 @@
 
 #include "buffer_codec.h"
 #include "event_codec.h"
+#include "packet_codec.h"
 #include "security_event.h"
 
 static int testCount = 0;
@@ -136,13 +137,118 @@ static void testCircularBufferWrapAround(void) {
 	EXPECT_TRUE(buffer.count == 0);
 }
 
+static void testPacketRoundTrip(void) {
+	printf("Testing packet encoding round-trip...\n");
+
+	SecurityEvent heartbeat = {
+		1U,
+		1ULL,
+		EVENT_HEARTBEAT
+	};
+
+	uint8_t bytes[EVENT_PACKET_SIZE] = { 0 };
+	SecurityEvent decodedEvent = { 0 };
+
+	EXPECT_TRUE(encodeEventPacket(&heartbeat, bytes, sizeof bytes));
+	EXPECT_TRUE(decodeEventPacket(bytes, sizeof bytes, &decodedEvent));
+
+	EXPECT_TRUE(heartbeat.agent_id == decodedEvent.agent_id);
+	EXPECT_TRUE(heartbeat.sequence_number == decodedEvent.sequence_number);
+	EXPECT_TRUE(heartbeat.type == decodedEvent.type);
+}
+
+static void testInvalidPacketHeader(void) {
+	printf("Testing invalid packet header...\n");
+
+	SecurityEvent heartbeat = {
+		1U,
+		1ULL,
+		EVENT_HEARTBEAT
+	};
+
+	uint8_t bytes[EVENT_PACKET_SIZE] = { 0 };
+
+	encodeEventPacket(&heartbeat, bytes, sizeof bytes);
+
+	bytes[0] ^= 0x10U;
+
+	SecurityEvent protectedEvent1 = {
+		100U,
+		100ULL,
+		EVENT_SERVICE_STOP
+	};
+
+	EXPECT_TRUE(!decodeEventPacket(bytes, sizeof bytes, &protectedEvent1));
+
+	EXPECT_TRUE(protectedEvent1.agent_id == 100U);
+	EXPECT_TRUE(protectedEvent1.sequence_number == 100ULL);
+	EXPECT_TRUE(protectedEvent1.type == EVENT_SERVICE_STOP);
+
+	EXPECT_TRUE(encodeEventPacket(&heartbeat, bytes, sizeof bytes));
+
+	bytes[4] = 0U;
+	bytes[5] = 2U;
+
+	SecurityEvent protectedEvent2 = {
+		200U,
+		200ULL,
+		EVENT_LOGIN_FAILED
+	};
+
+	EXPECT_TRUE(!decodeEventPacket(bytes, sizeof bytes, &protectedEvent2));
+
+	EXPECT_TRUE(protectedEvent2.agent_id == 200U);
+	EXPECT_TRUE(protectedEvent2.sequence_number == 200ULL);
+	EXPECT_TRUE(protectedEvent2.type == EVENT_LOGIN_FAILED);
+
+	EXPECT_TRUE(encodeEventPacket(&heartbeat, bytes, sizeof bytes));
+
+	bytes[6] = 0U;
+	bytes[7] = 15U;
+
+	SecurityEvent protectedEvent3 = {
+		300U,
+		300ULL,
+		EVENT_HEARTBEAT
+	};
+
+	EXPECT_TRUE(!decodeEventPacket(bytes, sizeof bytes, &protectedEvent3));
+
+	EXPECT_TRUE(protectedEvent3.agent_id == 300U);
+	EXPECT_TRUE(protectedEvent3.sequence_number == 300ULL);
+	EXPECT_TRUE(protectedEvent3.type == EVENT_HEARTBEAT);
+}
+
+static void testTruncatedPacket(void) {
+	printf("Testing truncated packet decoding...\n");
+
+	SecurityEvent heartbeat = {
+		1U,
+		1ULL,
+		EVENT_HEARTBEAT
+	};
+
+	uint8_t bytes[EVENT_PACKET_SIZE] = { 0 };
+	SecurityEvent decodedEvent = { 0 };
+
+	encodeEventPacket(&heartbeat, bytes, sizeof bytes);
+
+	for (size_t size = 0; size < EVENT_PACKET_SIZE; size++)
+		EXPECT_TRUE(!decodeEventPacket(bytes, size, &decodedEvent));
+}
+
 int main(void) {
 	printf("SentinelGrig Agent Tests start\n\n");
 
 	testEventTypeValidation();
 	testSerializationRoundTrip();
+
 	testInvalidCodecArgument();
 	testCircularBufferWrapAround();
+
+	testPacketRoundTrip();
+	testInvalidPacketHeader();
+	testTruncatedPacket();
 
 	printf(
 		"\nTests Completed: %d checks, %d failures\n",

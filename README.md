@@ -1,1 +1,1 @@
-# SentinelGrid.Agent
+# SentinelGrid

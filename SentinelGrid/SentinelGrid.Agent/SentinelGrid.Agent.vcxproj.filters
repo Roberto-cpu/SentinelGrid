@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="File di risorse">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="File di origine\libs">
       <UniqueIdentifier>{1f575e10-1e57-4069-bdeb-f579f7bf004d}</UniqueIdentifier>
     </Filter>
@@ -24,27 +20,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\source\repos\SentinelGrid\SentinelGrid.Agent\buffer_codec.h">
+    <ClInclude Include="event_codec.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\source\repos\SentinelGrid\SentinelGrid.Agent\event_codec.h">
+    <ClInclude Include="security_event.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\source\repos\SentinelGrid\SentinelGrid.Agent\security_event.h">
+    <ClInclude Include="buffer_codec.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\source\repos\SentinelGrid\SentinelGrid.Agent\main.c">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\source\repos\SentinelGrid\SentinelGrid.Agent\buffer_codec.c">
+    <ClCompile Include="buffer_codec.c">
       <Filter>File di origine\libs\codecs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\source\repos\SentinelGrid\SentinelGrid.Agent\event_codec.c">
+    <ClCompile Include="event_codec.c">
       <Filter>File di origine\libs\codecs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\source\repos\SentinelGrid\SentinelGrid.Agent\security_event.c">
+    <ClCompile Include="security_event.c">
       <Filter>File di origine\libs\entities</Filter>
     </ClCompile>
   </ItemGroup>

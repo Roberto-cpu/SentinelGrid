@@ -3,6 +3,7 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="SentinelGrid.Agent.App/SentinelGrid.Agent.App.vcxproj" Id="902e29ad-a9eb-45ee-8ba7-f71b210f82b8" />
   <Project Path="SentinelGrid.Agent.Tests/SentinelGrid.Agent.Tests.vcxproj" Id="f3d9e176-df01-4fa1-bf3d-5e4771a82e12" />
   <Project Path="SentinelGrid.Agent/SentinelGrid.Agent.vcxproj" Id="ccbf1dfb-9931-4096-ac7f-8a6a8a614290" />
 </Solution>

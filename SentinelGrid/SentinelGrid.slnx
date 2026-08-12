@@ -4,6 +4,7 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="engine/SentinelGrid.Engine.App/SentinelGrid.Engine.App.vcxproj" Id="c510f007-c31c-4ebb-a14c-db1206943a01" />
+  <Project Path="engine/SentinelGrid.Engine.Network.Widows/SentinelGrid.Engine.Network.Widows.vcxproj" Id="8194b631-001a-4aab-af93-b37e1b02ba09" />
   <Project Path="engine/SentinelGrid.Engine.Tests/SentinelGrid.Engine.Tests.vcxproj" Id="97257fbe-66fc-4ab7-b5a7-75f8d946c2a9" />
   <Project Path="engine/SentinelGrid.Engine/SentinelGrid.Engine.vcxproj" Id="a50c97ce-0867-4404-997b-8df5f1826559" />
   <Project Path="SentinelGrid.Agent.App/SentinelGrid.Agent.App.vcxproj" Id="902e29ad-a9eb-45ee-8ba7-f71b210f82b8" />

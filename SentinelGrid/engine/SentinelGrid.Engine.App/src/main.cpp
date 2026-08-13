@@ -66,28 +66,39 @@ int main() {
 
 	std::cout << "Agent connection accepted.\n";
 
-	std::array<std::uint8_t, sentinelgrid::engine::EventPacketSize> packet{};
-	const auto receiveRes = sentinelgrid::engine::network::receiveExactly(client, packet);
+	while (true) {
+		std::array<std::uint8_t, sentinelgrid::engine::EventPacketSize> packet{};
+		const auto receiveRes = sentinelgrid::engine::network::receiveExactly(client, packet);
 
-	if (receiveRes.status != sentinelgrid::engine::network::ReceiveStatus::success) {
-		std::cerr << "Packet reception failed.\n" <<
-			"Bytes received: " << receiveRes.receivedBytes << ".\n" <<
-			"Error code: " << receiveRes.errorCode << "\n";
-		return EXIT_FAILURE;
-	}
+	
+		if (receiveRes.status == sentinelgrid::engine::network::ReceiveStatus::peer_closed && receiveRes.receivedBytes == 0) {
+			std::cerr << "The Agent has closed the connection\n";
+			break;
+		}
 
-	std::cout << "Packet trasmission completed.\n" <<
-		"Received bytes: " << receiveRes.receivedBytes << ".\n";
+		if (receiveRes.status == sentinelgrid::engine::network::ReceiveStatus::peer_closed && receiveRes.receivedBytes > 0) {
+			std::cerr << "Unexpected closed connection.\n";
+			break;
+		}
 
-	const auto decodeRes = sentinelgrid::engine::decodeEventPacket(packet);
-	if (const auto* event = std::get_if<sentinelgrid::engine::SecurityEvent>(&decodeRes)) {
-		std::cout << "Agent ID: " << event->agent_id << "\n"
-			<< "Sequence Number: " << event->sequence_number << "\n"
-			<< "Event Type: " << sentinelgrid::engine::eventTypeToString(event->type) << "\n";
-	}
-	else {
-		const auto error = std::get<sentinelgrid::engine::DecodeError>(decodeRes);
-		std::cerr << "Decoding Error: " << sentinelgrid::engine::decodeErrorToString(error) << "\n";
+		if (receiveRes.status == sentinelgrid::engine::network::ReceiveStatus::socket_error) {
+			std::cerr << "Socket Crashed.\n" <<
+				"Bytes received: " << receiveRes.receivedBytes << ".\n" <<
+				"Error code: " << receiveRes.errorCode << "\n";
+			break;
+		}
+
+		const auto decodeRes = sentinelgrid::engine::decodeEventPacket(packet);
+		if (const auto* event = std::get_if<sentinelgrid::engine::SecurityEvent>(&decodeRes)) {
+			std::cout << "Agent ID: " << event->agent_id
+				<< ", Sequence Number: " << event->sequence_number
+				<< ", Event Type: " << sentinelgrid::engine::eventTypeToString(event->type) << "\n";
+		}
+		else {
+			const auto error = std::get<sentinelgrid::engine::DecodeError>(decodeRes);
+			std::cerr << "Decoding Error: " << sentinelgrid::engine::decodeErrorToString(error) << "\n";
+			break;
+		}
 	}
 
 	server.stop();

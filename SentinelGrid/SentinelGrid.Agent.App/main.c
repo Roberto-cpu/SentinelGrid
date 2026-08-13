@@ -21,16 +21,23 @@ int main(void) {
 		1ULL,
 		EVENT_HEARTBEAT
 	};
-
-	uint8_t packet[EVENT_PACKET_SIZE] = { 0 };
 	
-	if (!encodeEventPacket(&heartbeat, packet, sizeof packet)) {
-		printf("Unable to encode event packet.\n");
-		return 1;
-	}
+	SecurityEvent login_failed = {
+		1U,
+		2ULL,
+		EVENT_LOGIN_FAILED
+	};
 	
-	printBytes(packet, sizeof packet);
+	SecurityEvent service_stop = {
+		1U,
+		3ULL,
+		EVENT_SERVICE_STOP
+	};
 
+	uint8_t packet_h[EVENT_PACKET_SIZE] = { 0 };
+	uint8_t packet_l[EVENT_PACKET_SIZE] = { 0 };
+	uint8_t packet_s[EVENT_PACKET_SIZE] = { 0 };
+	
 	TcpClient client = { 0 };
 	initTcpClient(&client);
 
@@ -40,21 +47,45 @@ int main(void) {
 		return 1;
 	}
 
-	if (!tcpClientSendAll(&client, packet, sizeof packet)) {
+	if (!encodeEventPacket(&heartbeat, packet_h, sizeof packet_h)) {
+		printf("Unable to encode event packet.\n");
+		return 1;
+	}
+
+	if (!tcpClientSendAll(&client, packet_h, sizeof packet_h)) {
 		printf("Unable to send the packet.\n");
 		tcpClientClose(&client);
 		return 1;
 	}
 
-	printf("Packet correctly sent.\n");
-	tcpClientClose(&client);
+	printf("Heartbeat packet correctly sent.\n");
 
-	/*if (!decodeEventPacket(bytes, EVENT_PACKET_SIZE, &decodedEvent)) {
-		printf("Unable to decode event packet.\n");
+	if (!encodeEventPacket(&login_failed, packet_l, sizeof packet_l)) {
+		printf("Unable to encode event packet.\n");
 		return 1;
-	}*/
+	}
 
-	//printEvent(&decodedEvent);
+	if (!tcpClientSendAll(&client, packet_l, sizeof packet_l)) {
+		printf("Unable to send the packet.\n");
+		tcpClientClose(&client);
+		return 1;
+	}
 
+	printf("Login failed packet correctly sent.\n");
+
+	if (!encodeEventPacket(&service_stop, packet_s, sizeof packet_s)) {
+		printf("Unable to encode event packet.\n");
+		return 1;
+	}
+
+	if (!tcpClientSendAll(&client, packet_s, sizeof packet_s)) {
+		printf("Unable to send the packet.\n");
+		tcpClientClose(&client);
+		return 1;
+	}
+
+	printf("Service stop packet correctly sent.\n");
+
+	tcpClientClose(&client);
 	return 0;
 }

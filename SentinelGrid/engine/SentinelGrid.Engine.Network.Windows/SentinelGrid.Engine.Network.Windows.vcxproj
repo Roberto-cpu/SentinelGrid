@@ -147,10 +147,12 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="libs\network\tcp_server.hpp" />
     <ClInclude Include="libs\network\unique_socket.hpp" />
     <ClInclude Include="libs\network\winsock_runtime.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\tcp_server.cpp" />
     <ClCompile Include="src\unique_socket.cpp" />
     <ClCompile Include="src\winsock_runtime.cpp" />
   </ItemGroup>

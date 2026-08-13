@@ -18,9 +18,15 @@
     <ClInclude Include="libs\network\winsock_runtime.hpp">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="libs\network\unique_socket.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\winsock_runtime.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\unique_socket.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

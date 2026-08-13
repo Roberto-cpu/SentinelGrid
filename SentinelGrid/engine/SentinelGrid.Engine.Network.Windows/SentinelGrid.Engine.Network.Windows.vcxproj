@@ -147,9 +147,11 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="libs\network\unique_socket.hpp" />
     <ClInclude Include="libs\network\winsock_runtime.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\unique_socket.cpp" />
     <ClCompile Include="src\winsock_runtime.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

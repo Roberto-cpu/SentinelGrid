@@ -24,6 +24,9 @@
     <ClInclude Include="libs\network\tcp_server.hpp">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="libs\network\socket_io.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\winsock_runtime.cpp">
@@ -33,6 +36,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="src\tcp_server.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\socket_io.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,9 +1,12 @@
 #include <cstdlib>
 #include <iostream>
+#include <array>
 
 #include <network/winsock_runtime.hpp>
 #include <network/tcp_server.hpp>
 #include <network/unique_socket.hpp>
+#include <network/socket_io.hpp>
+#include <packet_decoder.hpp>
 
 int main() {
 	using sentinelgrid::engine::network::WinsockRuntime;
@@ -62,6 +65,30 @@ int main() {
 	}
 
 	std::cout << "Agent connection accepted.\n";
+
+	std::array<std::uint8_t, sentinelgrid::engine::EventPacketSize> packet{};
+	const auto receiveRes = sentinelgrid::engine::network::receiveExactly(client, packet);
+
+	if (receiveRes.status != sentinelgrid::engine::network::ReceiveStatus::success) {
+		std::cerr << "Packet reception failed.\n" <<
+			"Bytes received: " << receiveRes.receivedBytes << ".\n" <<
+			"Error code: " << receiveRes.errorCode << "\n";
+		return EXIT_FAILURE;
+	}
+
+	std::cout << "Packet trasmission completed.\n" <<
+		"Received bytes: " << receiveRes.receivedBytes << ".\n";
+
+	const auto decodeRes = sentinelgrid::engine::decodeEventPacket(packet);
+	if (const auto* event = std::get_if<sentinelgrid::engine::SecurityEvent>(&decodeRes)) {
+		std::cout << "Agent ID: " << event->agent_id << "\n"
+			<< "Sequence Number: " << event->sequence_number << "\n"
+			<< "Event Type: " << sentinelgrid::engine::eventTypeToString(event->type) << "\n";
+	}
+	else {
+		const auto error = std::get<sentinelgrid::engine::DecodeError>(decodeRes);
+		std::cerr << "Decoding Error: " << sentinelgrid::engine::decodeErrorToString(error) << "\n";
+	}
 
 	server.stop();
 

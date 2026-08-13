@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <span>
 #include <variant>
+#include <string_view>
 
 #include "../../libs/codecs/packet_decoder.hpp"
 #include "../../libs/codecs/security_event.hpp"
@@ -75,6 +76,36 @@ namespace sentinelgrid::engine {
 			.sequence_number = sequence_number,
 			.type = eventType
 		};
+	}
+
+	std::string_view eventTypeToString(EventType type) noexcept {
+		switch (type) {
+			case EventType::heartbeat: 
+				return "HEARTBEAT";
+			case EventType::login_failed:
+				return "LOGIN FAILED";
+			case EventType::service_stop:
+				return "SERVICE STOP";
+			default:
+				return "UNKNOWN";
+		}
+	}
+
+	std::string_view decodeErrorToString(DecodeError err) noexcept {
+		switch (err) {
+			case DecodeError::packetTooSmall:
+				return "Packet Too Small";
+			case DecodeError::invalidMagic:
+				return "Inalid Magic";
+			case DecodeError::unsupportedVersion:
+				return "Unsupported Protocol Version";
+			case DecodeError::invalidPayloadLength:
+				return "Invalid Payload Length";
+			case DecodeError::invalidEventType:
+				return "Invalid Event Type";
+			default:
+				return "Unknown Error";
+		}
 	}
 }
 

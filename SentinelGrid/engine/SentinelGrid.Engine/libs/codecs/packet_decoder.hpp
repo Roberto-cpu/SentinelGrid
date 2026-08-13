@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <span>
 #include <variant>
+#include <string_view>
 
 #include "security_event.hpp"
 
@@ -26,4 +27,10 @@ namespace sentinelgrid::engine {
 
 	[[nodiscard]]
 	DecodeResult decodeEventPacket(std::span<const std::uint8_t> packet) noexcept;
+
+	[[nodiscard]]
+	std::string_view eventTypeToString(EventType type) noexcept;
+
+	[[nodiscard]]
+	std::string_view decodeErrorToString(DecodeError err) noexcept;
 }

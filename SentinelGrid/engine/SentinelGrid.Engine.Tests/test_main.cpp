@@ -3,8 +3,13 @@
 #include <iostream>
 #include <variant>
 #include <array>
+#include <optional>
+#include <thread>
+#include <future>
+#include <chrono>
 
-#include "packet_decoder.hpp"
+#include <codecs/packet_decoder.hpp>
+#include <concurrency/buonded_blocking_queue.hpp>
 
 static int testCount = 0;
 static int failCount = 0;
@@ -50,15 +55,15 @@ namespace sentinelgrid::engine {
 
 		const auto heartbeatPacket = getBytesPacket();
 
-		const auto result = sentinelgrid::engine::decodeEventPacket(heartbeatPacket);
-		EXPECT_TRUE(std::holds_alternative<sentinelgrid::engine::SecurityEvent>(result));
+		const auto result = decodeEventPacket(heartbeatPacket);
+		EXPECT_TRUE(std::holds_alternative<SecurityEvent>(result));
 
-		if (std::holds_alternative<sentinelgrid::engine::SecurityEvent>(result)) {
-			const auto& event = std::get<sentinelgrid::engine::SecurityEvent>(result);
+		if (std::holds_alternative<SecurityEvent>(result)) {
+			const auto& event = std::get<SecurityEvent>(result);
 
 			EXPECT_TRUE(event.agent_id == 1U);
 			EXPECT_TRUE(event.sequence_number == 1ULL);
-			EXPECT_TRUE(event.type == sentinelgrid::engine::EventType::heartbeat);
+			EXPECT_TRUE(event.type == EventType::heartbeat);
 		}
 	}
 
@@ -97,6 +102,130 @@ namespace sentinelgrid::engine {
 		invalidPacketType[23] = 0x63;
 		expectedDecodeError(invalidPacketType, DecodeError::invalidEventType);
 	} 
+
+	static void testFIFORoundTrip() {
+		std::cout << "Test FIFO queue round-trip...\n";
+
+		concurrency::BoundedBlockingQueue<int> queue{ 3 };
+
+		EXPECT_TRUE(queue.push(10));
+		EXPECT_TRUE(queue.push(20));
+		EXPECT_TRUE(queue.push(30));
+
+		
+		EXPECT_TRUE(queue.pop() == 10);
+		EXPECT_TRUE(queue.pop() == 20);
+		EXPECT_TRUE(queue.pop() == 30);
+	}
+
+	static void testZeroCapacityDetection() {
+		std::cout << "Test Zero Capacity initialization...\n";
+
+		bool exceptionThrown = false;
+
+		try {
+			concurrency::BoundedBlockingQueue<int> queue{ 0 };
+		}
+		catch (const std::invalid_argument&) {
+			exceptionThrown = true;
+		}
+
+		EXPECT_TRUE(exceptionThrown);
+	}
+
+	static void testPushAfterClose() {
+		std::cout << "Testing push after closing queue...\n";
+
+		concurrency::BoundedBlockingQueue<int> queue{ 1 };
+		queue.close();
+
+		EXPECT_TRUE(!queue.push(10));
+	}
+
+	static void testDrainAfterClose() {
+		std::cout << "Test drain after close...\n";
+
+		concurrency::BoundedBlockingQueue<int> queue{ 10 };
+
+		EXPECT_TRUE(queue.push(10));
+		EXPECT_TRUE(queue.push(20));
+
+		queue.close();
+		EXPECT_TRUE(queue.pop() == 10);
+		EXPECT_TRUE(queue.pop() == 20);
+		EXPECT_TRUE(queue.pop() == std::nullopt);
+	}
+
+	static void testBlockedConsumer() {
+		std::cout << "Test blocked consumer...\n";
+		 
+		concurrency::BoundedBlockingQueue<int> queue{ 1 };
+
+		std::promise<void> startedPromise;
+		const auto startedFuture = startedPromise.get_future();
+
+		std::promise<std::optional<int>> resultPromise;
+		const auto resultFuture = resultPromise.get_future();
+
+		std::jthread consumer{
+			[&queue, &startedPromise, &resultPromise]() {
+				startedPromise.set_value();
+				resultPromise.set_value(queue.pop()); // Blocks the consumer until the a value is pushed into the queue
+			}
+		};
+
+		startedFuture.wait(); // ensures that the consumer thread has started
+
+		// checks that the consumer waits because the queue is empty
+		EXPECT_TRUE(resultFuture.wait_for(std::chrono::microseconds{ 50 }) == std::future_status::timeout);
+		EXPECT_TRUE(queue.push(42));
+
+		const auto status = resultFuture.wait_for(std::chrono::milliseconds{ 1 });
+		EXPECT_TRUE(status == std::future_status::ready);
+
+		if (status == std::future_status::ready) {
+			const auto result = resultFuture._Get_value();
+			EXPECT_TRUE(result.has_value());
+
+			if (result.has_value()) {
+				EXPECT_TRUE(result.value() == 42);
+			}
+		}
+	}
+
+	static void testWakesAblockedConsumer() {
+		std::cout << "Test close wakes a blocked consumer...\n";
+
+		concurrency::BoundedBlockingQueue<int> queue{ 1 };
+
+		std::promise<void> startedPromise;
+		const auto startedFuture = startedPromise.get_future();
+
+		std::promise<std::optional<int>> resultPromise;
+		const auto resultFuture = resultPromise.get_future();
+
+		std::jthread consumer{
+			[&queue, &startedPromise, &resultPromise]() {
+				startedPromise.set_value();
+				resultPromise.set_value(queue.pop()); // Blocks the consumer until the a value is pushed into the queue
+			}
+		};
+
+		startedFuture.wait(); // ensures that the consumer thread has started
+
+		// checks that the consumer waits because the queue is empty
+		EXPECT_TRUE(resultFuture.wait_for(std::chrono::microseconds{ 50 }) == std::future_status::timeout);
+		
+		queue.close();
+
+		const auto status = resultFuture.wait_for(std::chrono::milliseconds{ 1 });
+		EXPECT_TRUE(status == std::future_status::ready);
+
+		if (status == std::future_status::ready) {
+			const auto result = resultFuture._Get_value();
+			EXPECT_TRUE(!result.has_value());
+		}
+	}
 }
 
 int main(void) {
@@ -105,6 +234,13 @@ int main(void) {
 	sentinelgrid::engine::testPacketDecoder();
 	sentinelgrid::engine::testTruncatedPacket();
 	sentinelgrid::engine::testInvalidHeaders();
+
+	sentinelgrid::engine::testFIFORoundTrip();
+	sentinelgrid::engine::testZeroCapacityDetection();
+	sentinelgrid::engine::testPushAfterClose();
+	sentinelgrid::engine::testDrainAfterClose();
+	sentinelgrid::engine::testBlockedConsumer();
+	sentinelgrid::engine::testWakesAblockedConsumer();
 
 	std::cout << "\nTests Completed: " << testCount << " checks, " << failCount << " failures.\n";
 		

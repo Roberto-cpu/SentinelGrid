@@ -7,29 +7,41 @@
 
 #include <stdio.h>
 
-#include "security_event.h"
-#include "event_codec.h"
-#include "buffer_codec.h"
-#include "packet_codec.h"
-#include "tcp_client.h"
+#include <agent/codecs/security_event.h>
+#include <agent/codecs/event_codec.h>
+#include <agent/codecs/buffer_codec.h>
+#include <agent/protocols/packet_codec.h>
+#include <agent/sockets/tcp_client.h>
+#include <utilities/agent_options.h>
 
-int main(void) {
-	printf("SentinelGrid agent started\n");
+int main(int argc, char* argv[]) {
+	AgentOptions options = { 0 };
+
+	if (!parseAgentOptions(argc, argv, &options)) {
+		fprintf(
+			stderr,
+			"Usage: %s <agent-id>\n",
+			argc > 0 ? argv[0] : "SentinelGrid.Agent.App"
+		);
+		return EXIT_FAILURE;
+	}
+
+	printf("SentinelGrid agent %d started\n", options.agent_id);
 
 	SecurityEvent heartbeat = {
-		1U,
+		options.agent_id,
 		1ULL,
 		EVENT_HEARTBEAT
 	};
 	
 	SecurityEvent login_failed = {
-		1U,
+		options.agent_id,
 		2ULL,
 		EVENT_LOGIN_FAILED
 	};
 	
 	SecurityEvent service_stop = {
-		1U,
+		options.agent_id,
 		3ULL,
 		EVENT_SERVICE_STOP
 	};
@@ -44,48 +56,48 @@ int main(void) {
 	if (!tcpClientConnect(&client, "127.0.0.1", 5050U)) {
 		printf("Unable to connect to the engine.\n");
 		tcpClientClose(&client);
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	if (!encodeEventPacket(&heartbeat, packet_h, sizeof packet_h)) {
 		printf("Unable to encode event packet.\n");
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	if (!tcpClientSendAll(&client, packet_h, sizeof packet_h)) {
 		printf("Unable to send the packet.\n");
 		tcpClientClose(&client);
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	printf("Heartbeat packet correctly sent.\n");
 
 	if (!encodeEventPacket(&login_failed, packet_l, sizeof packet_l)) {
 		printf("Unable to encode event packet.\n");
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	if (!tcpClientSendAll(&client, packet_l, sizeof packet_l)) {
 		printf("Unable to send the packet.\n");
 		tcpClientClose(&client);
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	printf("Login failed packet correctly sent.\n");
 
 	if (!encodeEventPacket(&service_stop, packet_s, sizeof packet_s)) {
 		printf("Unable to encode event packet.\n");
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	if (!tcpClientSendAll(&client, packet_s, sizeof packet_s)) {
 		printf("Unable to send the packet.\n");
 		tcpClientClose(&client);
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	printf("Service stop packet correctly sent.\n");
 
 	tcpClientClose(&client);
-	return 0;
+	return EXIT_SUCCESS;
 }

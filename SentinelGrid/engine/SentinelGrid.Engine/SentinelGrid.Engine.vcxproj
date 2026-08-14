@@ -151,7 +151,7 @@
     <ClInclude Include="libs\codecs\security_event.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="libs\concurrency\buonded_blocking_queue.hpp" />
+    <ClCompile Include="libs\concurrency\bounded_blocking_queue.hpp" />
     <ClCompile Include="src\network\packet_decoder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

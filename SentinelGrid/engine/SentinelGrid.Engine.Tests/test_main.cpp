@@ -9,7 +9,7 @@
 #include <chrono>
 
 #include <codecs/packet_decoder.hpp>
-#include <concurrency/buonded_blocking_queue.hpp>
+#include <concurrency/bounded_blocking_queue.hpp>
 
 static int testCount = 0;
 static int failCount = 0;
@@ -226,6 +226,54 @@ namespace sentinelgrid::engine {
 			EXPECT_TRUE(!result.has_value());
 		}
 	}
+
+	static void testFullQueueBlock() {
+		std::cout << "Test blocked producer...\n";
+
+		concurrency::BoundedBlockingQueue<int> queue{ 1 };
+		EXPECT_TRUE(queue.push(10));
+
+		std::promise<void> startPromise;
+		auto startFuture = startPromise.get_future();
+
+		std::promise<std::optional<int>> pushPromise;
+		auto pushFuture = pushPromise.get_future();
+
+		std::jthread consumer{
+			[&queue, &startPromise, &pushPromise]() {
+				startPromise.set_value();
+				pushPromise.set_value(queue.push(20));
+			}
+		};
+
+		startFuture.wait();
+		EXPECT_TRUE(pushFuture.wait_for(std::chrono::microseconds{ 50 }) == std::future_status::timeout);
+
+		EXPECT_TRUE(queue.size() == 1);
+
+		const auto first = queue.pop();
+
+		EXPECT_TRUE(first.has_value());
+
+		if (first.has_value()) {
+			EXPECT_TRUE(*first == 10);
+		}
+
+		const auto status = pushFuture.wait_for(std::chrono::milliseconds{ 1 });
+		EXPECT_TRUE(status == std::future_status::ready);
+
+		if (status == std::future_status::ready)
+			EXPECT_TRUE(pushFuture.get());
+		
+		const auto second = queue.pop();
+
+		EXPECT_TRUE(second.has_value());
+		
+		if (second.has_value())
+			EXPECT_TRUE(*second == 20);
+
+		queue.close();
+	}
 }
 
 int main(void) {
@@ -241,6 +289,7 @@ int main(void) {
 	sentinelgrid::engine::testDrainAfterClose();
 	sentinelgrid::engine::testBlockedConsumer();
 	sentinelgrid::engine::testWakesAblockedConsumer();
+	sentinelgrid::engine::testFullQueueBlock();
 
 	std::cout << "\nTests Completed: " << testCount << " checks, " << failCount << " failures.\n";
 		

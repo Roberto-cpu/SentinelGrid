@@ -26,7 +26,7 @@
     <ClCompile Include="src\network\packet_decoder.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="libs\concurrency\buonded_blocking_queue.hpp">
+    <ClCompile Include="libs\concurrency\bounded_blocking_queue.hpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

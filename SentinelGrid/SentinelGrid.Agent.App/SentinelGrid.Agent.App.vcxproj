@@ -81,7 +81,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)SentinelGrid.Agent\include\agent\protocols;$(SolutionDir)SentinelGrid.Agent\include\agent\sockets;$(SolutionDir)SentinelGrid.Agent\include\agent\codecs;$(SolutionDir)SentinelGrid.Agent\src\protocols;$(SolutionDir)SentinelGrid.Agent\src\domains;$(SolutionDir)SentinelGrid.Agent\src\collections;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs;$(SolutionDir)SentinelGrid.Agent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -101,7 +101,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)SentinelGrid.Agent\include\agent\protocols;$(SolutionDir)SentinelGrid.Agent\include\agent\sockets;$(SolutionDir)SentinelGrid.Agent\include\agent\codecs;$(SolutionDir)SentinelGrid.Agent\src\protocols;$(SolutionDir)SentinelGrid.Agent\src\domains;$(SolutionDir)SentinelGrid.Agent\src\collections;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs;$(SolutionDir)SentinelGrid.Agent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -119,7 +119,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)SentinelGrid.Agent\include\agent\protocols;$(SolutionDir)SentinelGrid.Agent\include\agent\sockets;$(SolutionDir)SentinelGrid.Agent\include\agent\codecs;$(SolutionDir)SentinelGrid.Agent\src\protocols;$(SolutionDir)SentinelGrid.Agent\src\domains;$(SolutionDir)SentinelGrid.Agent\src\collections;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs;$(SolutionDir)SentinelGrid.Agent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,7 +139,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)SentinelGrid.Agent\include\agent\protocols;$(SolutionDir)SentinelGrid.Agent\include\agent\sockets;$(SolutionDir)SentinelGrid.Agent\include\agent\codecs;$(SolutionDir)SentinelGrid.Agent\src\protocols;$(SolutionDir)SentinelGrid.Agent\src\domains;$(SolutionDir)SentinelGrid.Agent\src\collections;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs;$(SolutionDir)SentinelGrid.Agent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,7 +156,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.c" />
+    <ClCompile Include="src\agent_options.c" />
+    <ClCompile Include="src\main.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libs\utilities\agent_options.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

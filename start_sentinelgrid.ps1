@@ -32,7 +32,8 @@ $env:Path = "$($asanDll.DirectoryName);$env:Path"
 
 # Start server, then client
 $engineCommand = "& '$engine'"
-$agentCommand  = "& '$agent'"
+$agent1Command  = "& '$agent' 101"
+$agent2Command  = "& '$agent' 102"
 
 Start-Process powershell.exe -ArgumentList `
     "-NoExit", "-Command", $engineCommand
@@ -40,4 +41,7 @@ Start-Process powershell.exe -ArgumentList `
 Start-Sleep -Milliseconds 500
 
 Start-Process powershell.exe -ArgumentList `
-    "-NoExit", "-Command", $agentCommand
+    "-NoExit", "-Command", $agent1Command
+
+Start-Process powershell.exe -ArgumentList `
+    "-NoExit", "-Command", $agent2Command

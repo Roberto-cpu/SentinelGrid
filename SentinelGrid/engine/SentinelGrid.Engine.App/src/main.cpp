@@ -1,17 +1,26 @@
 #include <cstdlib>
 #include <iostream>
 #include <array>
+#include <thread>
+#include <variant>
+#include <cstddef>
+#include <vector>
 
 #include <network/winsock_runtime.hpp>
 #include <network/tcp_server.hpp>
 #include <network/unique_socket.hpp>
 #include <network/socket_io.hpp>
-#include <packet_decoder.hpp>
+#include <codecs/packet_decoder.hpp>
+#include <concurrency/bounded_blocking_queue.hpp>
+#include <agent_session.hpp>
 
 int main() {
-	using sentinelgrid::engine::network::WinsockRuntime;
-	using sentinelgrid::engine::network::UniqueSocket;
-	using sentinelgrid::engine::network::TcpServer;
+	using namespace sentinelgrid::engine;
+
+	using network::WinsockRuntime;
+	using network::UniqueSocket;
+	using network::TcpServer;
+	using EventQueue = concurrency::BoundedBlockingQueue<SecurityEvent>;
 
 
 	std::cout << "SentinelGrid Engine start.\n\n";
@@ -22,6 +31,8 @@ int main() {
 	static_assert(std::is_move_constructible_v<UniqueSocket>);
 	static_assert(std::is_move_assignable_v<UniqueSocket>);
 	
+	constexpr std::size_t AgentCount{ 2 };
+
 	WinsockRuntime winsock;
 
 	if (!winsock.isReady()) {
@@ -30,23 +41,8 @@ int main() {
 		return EXIT_FAILURE;
 	}
 
-	UniqueSocket first{ ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP) };
-
-	if (!first.isValid()) {
-		std::cerr << "Socket \"first\" creation failed.\n";
-		return EXIT_FAILURE;
-	}
-
-	UniqueSocket second{ std::move(first) };
-
-	if (first.isValid() || !second.isValid()) {
-		std::cerr << "Socket ownership transfer \"first\" -> \"second\" failed.\n";
-		return EXIT_FAILURE;
-	}
-
 	std::cout << "WinSock successfully initialized.\n";
-	std::cout << "Socket ownership transfer \"first\" -> \"second\" passed.\n";
-
+	
 	TcpServer server;
 
 	if (!server.start(5050U)) {
@@ -55,50 +51,64 @@ int main() {
 	}
 
 	std::cout << "SentinelGrid TCP server listening on: 127.0.0.1:5050.\n";
-	
 	std::cout << "Waiting for Agent connection...\n";
 
-	auto client = server.acceptClient();
-	if (!client.isValid()) {
-		std::cerr << "Unable to accept Agent connection.\n";
-		return EXIT_FAILURE;
+	std::vector<app::SessionResult> sessionResults(AgentCount);
+	std::vector<std::jthread> sessionWorkers;
+	sessionWorkers.reserve(AgentCount);
+
+	EventQueue eventQueue{ 4 };
+	std::size_t processedEvents{ 0 };
+	std::size_t totalEvents{ 0 };
+
+	std::jthread processor{
+		[&eventQueue, &processedEvents]() {
+			while (true) {
+				auto event = eventQueue.pop();
+
+				if (!event.has_value())
+					break;
+
+				std::cout << "Agent ID: " << event->agent_id
+					<< ", Sequence Number: " << event->sequence_number
+					<< ", Event Type: " << sentinelgrid::engine::eventTypeToString(event->type) << "\n";
+
+				processedEvents++;
+			}
+
+			std::cout << "Event processor stopped.\n";
+		}
+	};
+
+	for (std::size_t i = 0; i < AgentCount; ++i) {
+		auto client = server.acceptClient();
+		
+		if (!client.isValid()) {
+			std::cerr << "Unable to accept Agent \"" << (i + 1) << "\" connection.\n";
+			break;
+		}
+
+		std::cout << "Opened session for agent \"" << (i + 1) << "\".\n";
+
+		sessionWorkers.emplace_back(
+			[client = std::move(client), &eventQueue, &sessionResults, i]() mutable {
+					sessionResults[i] = app::runSessionAgent(std::move(client), eventQueue);
+				}
+			);
 	}
 
-	std::cout << "Agent connection accepted.\n";
+	for (auto& worker : sessionWorkers) {
+		if (worker.joinable())
+			worker.join();
+	}
 
-	while (true) {
-		std::array<std::uint8_t, sentinelgrid::engine::EventPacketSize> packet{};
-		const auto receiveRes = sentinelgrid::engine::network::receiveExactly(client, packet);
+	eventQueue.close();
 
-	
-		if (receiveRes.status == sentinelgrid::engine::network::ReceiveStatus::peer_closed && receiveRes.receivedBytes == 0) {
-			std::cerr << "The Agent has closed the connection\n";
-			break;
-		}
+	if (processor.joinable())
+		processor.join();
 
-		if (receiveRes.status == sentinelgrid::engine::network::ReceiveStatus::peer_closed && receiveRes.receivedBytes > 0) {
-			std::cerr << "Unexpected closed connection.\n";
-			break;
-		}
-
-		if (receiveRes.status == sentinelgrid::engine::network::ReceiveStatus::socket_error) {
-			std::cerr << "Socket Crashed.\n" <<
-				"Bytes received: " << receiveRes.receivedBytes << ".\n" <<
-				"Error code: " << receiveRes.errorCode << "\n";
-			break;
-		}
-
-		const auto decodeRes = sentinelgrid::engine::decodeEventPacket(packet);
-		if (const auto* event = std::get_if<sentinelgrid::engine::SecurityEvent>(&decodeRes)) {
-			std::cout << "Agent ID: " << event->agent_id
-				<< ", Sequence Number: " << event->sequence_number
-				<< ", Event Type: " << sentinelgrid::engine::eventTypeToString(event->type) << "\n";
-		}
-		else {
-			const auto error = std::get<sentinelgrid::engine::DecodeError>(decodeRes);
-			std::cerr << "Decoding Error: " << sentinelgrid::engine::decodeErrorToString(error) << "\n";
-			break;
-		}
+	for (const auto& result : sessionResults) {
+		totalEvents += result.eventsReceived;
 	}
 
 	server.stop();
@@ -109,6 +119,7 @@ int main() {
 	}
 
 	std::cout << "Server stopped.\n";
+	std::cout << "Processed Events: " << processedEvents << "/" << totalEvents << ".\n";
 
-	return EXIT_SUCCESS;
+	return  EXIT_SUCCESS;
 }

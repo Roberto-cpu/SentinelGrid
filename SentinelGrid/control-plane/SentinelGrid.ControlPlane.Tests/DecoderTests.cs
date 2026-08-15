@@ -1,5 +1,5 @@
-﻿using SentinelGrid.ControlPane.Domain;
-using SentinelGrid.ControlPane.Protocol;
+﻿using SentinelGrid.ControlPlane.Domain;
+using SentinelGrid.ControlPlane.Protocol;
 using System.Net.Sockets;
 
 namespace SentinelGrid.ControlPane.Tests;

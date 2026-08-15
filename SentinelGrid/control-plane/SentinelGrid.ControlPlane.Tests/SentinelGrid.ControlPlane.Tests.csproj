@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SentinelGrid.ControlPane.Domain\SentinelGrid.ControlPane.Domain.csproj" />
-    <ProjectReference Include="..\SentinelGrid.ControlPane.Protocol\SentinelGrid.ControlPane.Protocol.csproj" />
+    <ProjectReference Include="..\SentinelGrid.ControlPlane.Domain\SentinelGrid.ControlPlane.Domain.csproj" />
+    <ProjectReference Include="..\SentinelGrid.ControlPlane.Protocol\SentinelGrid.ControlPlane.Protocol.csproj" />
   </ItemGroup>
 
   <ItemGroup>

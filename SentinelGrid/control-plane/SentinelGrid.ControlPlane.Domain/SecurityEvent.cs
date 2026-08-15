@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SentinelGrid.ControlPane.Domain;
+namespace SentinelGrid.ControlPlane.Domain;
 
 public enum EventTypes : uint
 {

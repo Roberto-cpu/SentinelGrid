@@ -1,9 +1,9 @@
-﻿using SentinelGrid.ControlPane.Domain;
+﻿using SentinelGrid.ControlPlane.Domain;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SentinelGrid.ControlPane.Protocol;
+namespace SentinelGrid.ControlPlane.Protocol;
 
 public readonly record struct EngineDecodeResult(EngineMessage? Message, EngineDecodeError Error)
 {

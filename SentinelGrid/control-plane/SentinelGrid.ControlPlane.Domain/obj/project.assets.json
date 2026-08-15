@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-pane\\SentinelGrid.ControlPane.Domain\\SentinelGrid.ControlPane.Domain.csproj",
-      "projectName": "SentinelGrid.ControlPane.Domain",
-      "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-pane\\SentinelGrid.ControlPane.Domain\\SentinelGrid.ControlPane.Domain.csproj",
+      "projectUniqueName": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj",
+      "projectName": "SentinelGrid.ControlPlane.Domain",
+      "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj",
       "packagesPath": "C:\\Users\\rober\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-pane\\SentinelGrid.ControlPane.Domain\\obj\\",
+      "outputPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

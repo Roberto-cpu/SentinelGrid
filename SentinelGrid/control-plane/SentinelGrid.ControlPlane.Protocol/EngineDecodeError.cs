@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SentinelGrid.ControlPane.Protocol;
+namespace SentinelGrid.ControlPlane.Protocol;
 
 public enum EngineDecodeError
 {

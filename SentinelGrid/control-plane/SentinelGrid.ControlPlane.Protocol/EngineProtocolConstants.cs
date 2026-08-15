@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SentinelGrid.ControlPane.Protocol;
+namespace SentinelGrid.ControlPlane.Protocol;
 public static class EngineProtocolConstants
 {
     public const uint MagicNumber = 0x53475244;

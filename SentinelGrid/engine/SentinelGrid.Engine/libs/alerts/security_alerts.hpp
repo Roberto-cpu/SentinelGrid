@@ -5,15 +5,15 @@
 
 namespace sentinelgrid::engine {
 
-	enum class AlertType {
-		repeated_login_failure
+	enum class AlertType : std::uint32_t {
+		repeated_login_failure = 1
 	};
 
-	enum class AlertSeverity {
-		low,
-		medium,
-		high,
-		critical
+	enum class AlertSeverity : std::uint32_t {
+		low = 1,
+		medium = 2,
+		high = 3,
+		critical = 4
 	};
 
 	struct SecurityAlert {

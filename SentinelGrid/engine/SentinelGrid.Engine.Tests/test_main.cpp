@@ -11,6 +11,8 @@
 #include <codecs/packet_decoder.hpp>
 #include <concurrency/bounded_blocking_queue.hpp>
 #include <rules/failed_login_rule.hpp>
+#include <codecs/security_event.hpp>
+#include <protocol/control_plane_encoder.hpp>
 
 static int testCount = 0;
 static int failCount = 0;
@@ -282,7 +284,7 @@ namespace sentinelgrid::engine {
 		bool exceptionThrown = false;
 
 		try {
-			FailedLoginRule{ 0 };
+			FailedLoginRule rule{ 0 };
 		}
 		catch(std::invalid_argument&) {
 			exceptionThrown = true;
@@ -494,6 +496,178 @@ namespace sentinelgrid::engine {
 		alert = rule.evaluate(event6);
 		EXPECT_TRUE(alert->severity == AlertSeverity::high);
 	}
+
+	static SecurityEvent createSecurityEvent() {
+		return{
+			.agent_id = 101U,
+			.sequence_number = 3ULL,
+			.type = EventType::login_failed
+		};
+	}
+
+	static SecurityAlert createSecurityAlert() {
+		return{
+			.type = AlertType::repeated_login_failure,
+			.severity = AlertSeverity::high,
+			.agent_id = 101U,
+			.triggering_sequence = 3ULL,
+			.failure_count = 3U
+		};
+	}
+
+	static void testControlPlaneEventEncoding() {
+		std::cout << "Test Security Event Encoding...\n";
+
+		const SecurityEvent event{ createSecurityEvent() };
+		
+		std::array<std::uint8_t, protocol::EventPacketSize> output{};
+		protocol::EncodeResult result{ protocol::encodeControlPlaneMessage(event, output) };
+
+		EXPECT_TRUE(result.is_success());
+		EXPECT_TRUE(result.byte_written == 28);
+
+		constexpr std::array<std::uint8_t, protocol::EventPacketSize> expectedBytes{
+			0x53, 0x47, 0x52, 0x44, // SGRD
+			0x00, 0x01,             // Version
+			0x00, 0x01,             // SecurityEvent
+			0x00, 0x00, 0x00, 0x10, // Payload size 16
+
+			0x00, 0x00, 0x00, 0x65, // Agent 101
+
+			0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x03, // Sequence 3
+
+			0x00, 0x00, 0x00, 0x02  // LoginFailed	
+		};
+
+		EXPECT_TRUE(output == expectedBytes);
+	}
+
+	static void testControlPlaneAlertEncoding() {
+		std::cout << "Test Security Alert Encoding...\n";
+
+		const SecurityAlert alert{ createSecurityAlert()};
+
+		std::array<std::uint8_t, protocol::AlertPacketSize> output{};
+		protocol::EncodeResult result{ protocol::encodeControlPlaneMessage(alert, output) };
+
+		EXPECT_TRUE(result.is_success());
+		EXPECT_TRUE(result.byte_written == 36);
+
+		constexpr std::array<std::uint8_t, protocol::AlertPacketSize> expectedBytes{
+			0x53, 0x47, 0x52, 0x44, // SGRD
+			0x00, 0x01,             // Version
+			0x00, 0x02,             // SecurityAlert
+			0x00, 0x00, 0x00, 0x18, // Payload size 24
+
+			0x00, 0x00, 0x00, 0x01, // RepeatedLoginFailures
+			0x00, 0x00, 0x00, 0x03, // High
+			0x00, 0x00, 0x00, 0x65, // Agent 101
+
+			0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x03, // Triggering sequence 3
+
+			0x00, 0x00, 0x00, 0x03  // Failure count 3	
+		};
+
+		EXPECT_TRUE(output == expectedBytes);
+	}
+
+	static void testOutputTooSmall() {
+		
+		std::cout << "Test Output Too Small...\n";
+
+		const SecurityEvent event{ createSecurityEvent() };
+		const SecurityAlert alert{ createSecurityAlert() };
+
+		std::array<std::uint8_t, protocol::EventPacketSize - 1> outputEvent{};
+		protocol::EncodeResult resultEvent{ protocol::encodeControlPlaneMessage(event, outputEvent) };
+
+		std::array<std::uint8_t, protocol::AlertPacketSize - 1> outputAlert{};
+		protocol::EncodeResult resultAlert{ protocol::encodeControlPlaneMessage(alert, outputAlert) };
+
+		EXPECT_TRUE(resultEvent.error == protocol::EncodeError::output_too_small);
+		EXPECT_TRUE(resultAlert.error == protocol::EncodeError::output_too_small);
+	}
+
+	static void testAgentIdZero() {
+
+		std::cout << "Test Agent ID Zero...\n";
+
+		SecurityEvent event{ createSecurityEvent() };
+		event.agent_id = 0U;
+
+		SecurityAlert alert{ createSecurityAlert() };
+		alert.agent_id = 0U;
+
+		std::array<std::uint8_t, protocol::EventPacketSize> outputEvent{};
+		protocol::EncodeResult resultEvent{ protocol::encodeControlPlaneMessage(event, outputEvent) };
+
+		std::array<std::uint8_t, protocol::AlertPacketSize> outputAlert{};
+		protocol::EncodeResult resultAlert{ protocol::encodeControlPlaneMessage(alert, outputAlert) };
+
+		EXPECT_TRUE(resultEvent.error == protocol::EncodeError::invalid_agent_id);
+		EXPECT_TRUE(resultAlert.error == protocol::EncodeError::invalid_agent_id);
+	}
+
+	static void testInvalidEventType() {
+
+		std::cout << "Test Invalid Event Type...\n";
+
+		SecurityEvent event{ createSecurityEvent() };
+		event.type = static_cast<EventType>(99);
+		
+		std::array<std::uint8_t, protocol::EventPacketSize> output{};
+		protocol::EncodeResult resultEvent{ protocol::encodeControlPlaneMessage(event, output) };
+
+		EXPECT_TRUE(resultEvent.error == protocol::EncodeError::invalid_event_type);
+	}
+
+	static void testInvalidAlertType() {
+
+		std::cout << "Test Invalid Alert Type...\n";
+
+		SecurityAlert alert{ createSecurityAlert() };
+		alert.type = static_cast<AlertType>(99);
+
+		std::array<std::uint8_t, protocol::AlertPacketSize> output{};
+		protocol::EncodeResult resultAlert{ protocol::encodeControlPlaneMessage(alert, output) };
+
+		EXPECT_TRUE(resultAlert.error == protocol::EncodeError::invalid_alert_type);
+	}
+
+	static void testInvalidAlertSeverity() {
+
+		std::cout << "Test Invalid Alert Severity...\n";
+
+		SecurityAlert alert{ createSecurityAlert() };
+		alert.severity = static_cast<AlertSeverity>(0);
+
+		std::array<std::uint8_t, protocol::AlertPacketSize> output{};
+		protocol::EncodeResult resultAlert{ protocol::encodeControlPlaneMessage(alert, output) };
+
+		EXPECT_TRUE(resultAlert.error == protocol::EncodeError::invalid_severity);
+	}
+
+	static void testInvalidFailuresCount() {
+
+		std::cout << "Test Invalid Failures Count...\n";
+
+		SecurityAlert alert{ createSecurityAlert() };
+		alert.failure_count = 0;
+
+		std::array<std::uint8_t, protocol::AlertPacketSize> outputAlert0{};
+		protocol::EncodeResult resultAlert0{ protocol::encodeControlPlaneMessage(alert, outputAlert0) };
+
+		EXPECT_TRUE(resultAlert0.error == protocol::EncodeError::invalid_failure_count);
+
+		alert.failure_count = UINT32_MAX + 1;
+
+		std::array<std::uint8_t, protocol::AlertPacketSize> outputAlert{};
+		protocol::EncodeResult resultAlert{ protocol::encodeControlPlaneMessage(alert, outputAlert) };
+
+		EXPECT_TRUE(resultAlert.error == protocol::EncodeError::invalid_failure_count);
+	}
 }
 
 int main(void) {
@@ -505,7 +679,7 @@ int main(void) {
 	sentinelgrid::engine::testTruncatedPacket();
 	sentinelgrid::engine::testInvalidHeaders();
 
-	std::cout << "Running events queue management tests...\n\n";
+	std::cout << "\nRunning events queue management tests...\n\n";
 
 	sentinelgrid::engine::testFIFORoundTrip();
 	sentinelgrid::engine::testZeroCapacityDetection();
@@ -515,7 +689,7 @@ int main(void) {
 	sentinelgrid::engine::testWakesAblockedConsumer();
 	sentinelgrid::engine::testFullQueueBlock();
 
-	std::cout << "Running login attempts rules management tests...\n\n";
+	std::cout << "\nRunning login attempts rules management tests...\n\n";
 
 	sentinelgrid::engine::testLoginRuleZeroAttempts();
 	sentinelgrid::engine::testAlertOnThirdFailure();
@@ -523,6 +697,17 @@ int main(void) {
 	sentinelgrid::engine::testIgnoreHeartbeat();
 	sentinelgrid::engine::testServiceStopReset();
 	sentinelgrid::engine::testAlertResetsCounter();
+
+	std::cout << "\nRunning encoding tests...\n\n";
+
+	sentinelgrid::engine::testControlPlaneEventEncoding();
+	sentinelgrid::engine::testControlPlaneAlertEncoding();
+	sentinelgrid::engine::testOutputTooSmall();
+	sentinelgrid::engine::testAgentIdZero();
+	sentinelgrid::engine::testInvalidEventType();
+	sentinelgrid::engine::testInvalidAlertType();
+	sentinelgrid::engine::testInvalidAlertSeverity();
+	sentinelgrid::engine::testInvalidFailuresCount();
 
 	std::cout << "\nTests Completed: " << testCount << " checks, " << failCount << " failures.\n";
 		

@@ -150,10 +150,12 @@
     <ClInclude Include="libs\alerts\security_alerts.hpp" />
     <ClInclude Include="libs\codecs\packet_decoder.hpp" />
     <ClInclude Include="libs\codecs\security_event.hpp" />
+    <ClInclude Include="libs\protocol\control_plane_encoder.hpp" />
     <ClInclude Include="libs\rules\failed_login_rule.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="libs\concurrency\bounded_blocking_queue.hpp" />
+    <ClCompile Include="src\control_plane_encoder.cpp" />
     <ClCompile Include="src\failed_login_rule.cpp" />
     <ClCompile Include="src\network\packet_decoder.cpp" />
   </ItemGroup>

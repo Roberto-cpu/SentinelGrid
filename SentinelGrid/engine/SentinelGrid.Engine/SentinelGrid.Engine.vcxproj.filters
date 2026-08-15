@@ -27,6 +27,9 @@
     <ClInclude Include="libs\rules\failed_login_rule.hpp">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="libs\protocol\control_plane_encoder.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\network\packet_decoder.cpp">
@@ -36,6 +39,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="src\failed_login_rule.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\control_plane_encoder.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

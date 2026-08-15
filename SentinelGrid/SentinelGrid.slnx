@@ -1,13 +1,17 @@
 <Solution>
   <Configurations>
+    <Platform Name="Any CPU" />
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="app/SentinelGrid.Agent.App/SentinelGrid.Agent.App.vcxproj" Id="902e29ad-a9eb-45ee-8ba7-f71b210f82b8" />
+  <Project Path="app/SentinelGrid.Agent.Tests/SentinelGrid.Agent.Tests.vcxproj" Id="f3d9e176-df01-4fa1-bf3d-5e4771a82e12" />
+  <Project Path="app/SentinelGrid.Agent/SentinelGrid.Agent.vcxproj" Id="ccbf1dfb-9931-4096-ac7f-8a6a8a614290" />
+  <Project Path="control-pane/SentinelGrid.ControlPane.Domain/SentinelGrid.ControlPane.Domain.csproj" Id="2106eb0f-1ec4-419d-95bc-f5c5386f64a0" />
+  <Project Path="control-pane/SentinelGrid.ControlPane.Protocol/SentinelGrid.ControlPane.Protocol.csproj" Id="c1d3db46-bb74-4e93-a717-6c7772d91347" />
+  <Project Path="control-pane/SentinelGrid.ControlPane.Tests/SentinelGrid.ControlPane.Tests.csproj" Id="0f6b69a2-8987-468c-9770-fc68e7966ede" />
   <Project Path="engine/SentinelGrid.Engine.App/SentinelGrid.Engine.App.vcxproj" Id="c510f007-c31c-4ebb-a14c-db1206943a01" />
   <Project Path="engine/SentinelGrid.Engine.Network.Windows/SentinelGrid.Engine.Network.Windows.vcxproj" Id="087c4021-20ce-4877-989a-1b58d2e6c548" />
   <Project Path="engine/SentinelGrid.Engine.Tests/SentinelGrid.Engine.Tests.vcxproj" Id="97257fbe-66fc-4ab7-b5a7-75f8d946c2a9" />
   <Project Path="engine/SentinelGrid.Engine/SentinelGrid.Engine.vcxproj" Id="a50c97ce-0867-4404-997b-8df5f1826559" />
-  <Project Path="SentinelGrid.Agent.App/SentinelGrid.Agent.App.vcxproj" Id="902e29ad-a9eb-45ee-8ba7-f71b210f82b8" />
-  <Project Path="SentinelGrid.Agent.Tests/SentinelGrid.Agent.Tests.vcxproj" Id="f3d9e176-df01-4fa1-bf3d-5e4771a82e12" />
-  <Project Path="SentinelGrid.Agent/SentinelGrid.Agent.vcxproj" Id="ccbf1dfb-9931-4096-ac7f-8a6a8a614290" />
 </Solution>

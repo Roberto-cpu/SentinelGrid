@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "buffer_codec.h"
-#include "event_codec.h"
-#include "packet_codec.h"
-#include "security_event.h"
+#include <agent/codecs/buffer_codec.h>
+#include <agent/codecs/event_codec.h>
+#include <agent/protocols/packet_codec.h>
+#include <agent/codecs/security_event.h>
 
 static int testCount = 0;
 static int failCount = 0;

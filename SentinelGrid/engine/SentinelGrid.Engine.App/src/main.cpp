@@ -13,6 +13,7 @@
 #include <codecs/packet_decoder.hpp>
 #include <concurrency/bounded_blocking_queue.hpp>
 #include <agent_session.hpp>
+#include <rules/failed_login_rule.hpp>
 
 int main() {
 	using namespace sentinelgrid::engine;
@@ -63,17 +64,27 @@ int main() {
 
 	std::jthread processor{
 		[&eventQueue, &processedEvents]() {
+			FailedLoginRule loginRule{ 3 };
+
 			while (true) {
 				auto event = eventQueue.pop();
 
 				if (!event.has_value())
 					break;
 
-				std::cout << "Agent ID: " << event->agent_id
+				processedEvents++;
+
+				const auto loginAlert = loginRule.evaluate(*event);
+
+				if (loginAlert.has_value())
+					std::cout << "[ALERT] Agent " << loginAlert->agent_id
+					<< " generated " << loginAlert->failure_count
+					<< " failed login alerts. Trigger sequence: "
+					<< loginAlert->triggering_sequence << "\n";
+				else
+					std::cout << "Agent ID: " << event->agent_id
 					<< ", Sequence Number: " << event->sequence_number
 					<< ", Event Type: " << sentinelgrid::engine::eventTypeToString(event->type) << "\n";
-
-				processedEvents++;
 			}
 
 			std::cout << "Event processor stopped.\n";

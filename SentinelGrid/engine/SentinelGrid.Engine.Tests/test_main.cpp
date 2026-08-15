@@ -10,6 +10,7 @@
 
 #include <codecs/packet_decoder.hpp>
 #include <concurrency/bounded_blocking_queue.hpp>
+#include <rules/failed_login_rule.hpp>
 
 static int testCount = 0;
 static int failCount = 0;
@@ -274,14 +275,237 @@ namespace sentinelgrid::engine {
 
 		queue.close();
 	}
+
+	static void testLoginRuleZeroAttempts() {
+		std::cout << "Test zero login attempts allowed...\n";
+
+		bool exceptionThrown = false;
+
+		try {
+			FailedLoginRule{ 0 };
+		}
+		catch(std::invalid_argument&) {
+			exceptionThrown = true;
+		}
+
+		EXPECT_TRUE(exceptionThrown);
+	}
+
+	static void testAlertOnThirdFailure() {
+		std::cout << "Test alert on third failure...\n";
+
+		FailedLoginRule rule{ 3 };
+
+		std::size_t i = 1;
+		while (i < 4) {
+			SecurityEvent event{
+				1U,
+				(unsigned long)(i),
+				EventType::login_failed
+			};
+
+			if (i < 3) 
+				EXPECT_TRUE(rule.evaluate(event) == std::nullopt);
+			else {
+				auto alert = rule.evaluate(event);
+				EXPECT_TRUE(alert->severity == AlertSeverity::high);
+				EXPECT_TRUE(alert->type == AlertType::repeated_login_failure);
+			}
+			i++;
+		}
+	}
+
+	static void testAgentIsolation() {
+		std::cout << "Test agent isolation...\n";
+
+		FailedLoginRule rule{ 3 };
+
+		SecurityEvent event1{
+			1U,
+			1ULL,
+			EventType::login_failed
+		};
+		
+		SecurityEvent event2{
+			1U,
+			2ULL,
+			EventType::login_failed
+		};
+		
+		SecurityEvent event3{
+			2U,
+			1ULL,
+			EventType::login_failed
+		};
+		
+		SecurityEvent event4{
+			2U,
+			2ULL,
+			EventType::login_failed
+		};
+		
+		SecurityEvent event5{
+			1U,
+			3ULL,
+			EventType::login_failed
+		};
+
+		EXPECT_TRUE(rule.evaluate(event1) == std::nullopt);
+		EXPECT_TRUE(rule.evaluate(event2) == std::nullopt);
+		EXPECT_TRUE(rule.evaluate(event3) == std::nullopt);
+		EXPECT_TRUE(rule.evaluate(event4) == std::nullopt);
+
+		auto alert = rule.evaluate(event5);
+		EXPECT_TRUE(alert->severity == AlertSeverity::high);
+		EXPECT_TRUE(alert->agent_id == 1U);
+	}
+
+	static void testIgnoreHeartbeat() {
+		std::cout << "Test \"Heartbeat\" event is ignored...\n";
+
+		FailedLoginRule rule{ 3 };
+
+		SecurityEvent event1{
+			1U,
+			1ULL,
+			EventType::login_failed
+		};
+
+		SecurityEvent event2{
+			1U,
+			2ULL,
+			EventType::heartbeat
+		};
+
+		SecurityEvent event3{
+			1U,
+			3ULL,
+			EventType::login_failed
+		};
+
+		SecurityEvent event4{
+			1U,
+			4ULL,
+			EventType::login_failed
+		};
+
+		EXPECT_TRUE(rule.evaluate(event1) == std::nullopt);
+		EXPECT_TRUE(rule.evaluate(event2) == std::nullopt);
+		EXPECT_TRUE(rule.evaluate(event3) == std::nullopt);
+
+		auto alert = rule.evaluate(event4);
+		EXPECT_TRUE(alert->severity == AlertSeverity::high);
+	}
+
+	static void testServiceStopReset() {
+		std::cout << "Test \"Service Stop\" event resets counter...\n";
+
+		FailedLoginRule rule{ 3 };
+
+		SecurityEvent event1{
+			1U,
+			1ULL,
+			EventType::login_failed
+		};
+
+		SecurityEvent event2{
+			1U,
+			2ULL,
+			EventType::service_stop
+		};
+
+		SecurityEvent event3{
+			1U,
+			3ULL,
+			EventType::login_failed
+		};
+
+		SecurityEvent event4{
+			1U,
+			4ULL,
+			EventType::login_failed
+		};
+		
+		SecurityEvent event5{
+			1U,
+			5ULL,
+			EventType::login_failed
+		};
+
+		EXPECT_TRUE(rule.evaluate(event1) == std::nullopt);
+		EXPECT_TRUE(rule.evaluate(event2) == std::nullopt);
+		EXPECT_TRUE(rule.evaluate(event3) == std::nullopt);
+		EXPECT_TRUE(rule.evaluate(event4) == std::nullopt);
+
+		auto alert = rule.evaluate(event5);
+		EXPECT_TRUE(alert->severity == AlertSeverity::high);
+	}
+
+	static void testAlertResetsCounter() {
+		std::cout << "Test counter reset after alert...\n";
+
+		FailedLoginRule rule{ 3 };
+
+		SecurityEvent event1{
+			1U,
+			1ULL,
+			EventType::login_failed
+		};
+
+		SecurityEvent event2{
+			1U,
+			2ULL,
+			EventType::login_failed
+		};
+
+		SecurityEvent event3{
+			1U,
+			3ULL,
+			EventType::login_failed
+		};
+
+		SecurityEvent event4{
+			1U,
+			4ULL,
+			EventType::login_failed
+		};
+
+		SecurityEvent event5{
+			1U,
+			5ULL,
+			EventType::login_failed
+		};
+
+		SecurityEvent event6{
+			1U,
+			6ULL,
+			EventType::login_failed
+		};
+
+		EXPECT_TRUE(rule.evaluate(event1) == std::nullopt);
+		EXPECT_TRUE(rule.evaluate(event2) == std::nullopt);
+
+		auto alert = rule.evaluate(event3);
+		EXPECT_TRUE(alert->severity == AlertSeverity::high);
+
+		EXPECT_TRUE(rule.evaluate(event4) == std::nullopt);
+		EXPECT_TRUE(rule.evaluate(event5) == std::nullopt);
+
+		alert = rule.evaluate(event6);
+		EXPECT_TRUE(alert->severity == AlertSeverity::high);
+	}
 }
 
 int main(void) {
-	std::cout << "Start SentinelGrid Engine Unit Tests.\n\n";
+	std::cout << "Start SentinelGrid Engine Unit Tests.\n\n\n";
+
+	std::cout << "Running Server packet management tests...\n\n";
 
 	sentinelgrid::engine::testPacketDecoder();
 	sentinelgrid::engine::testTruncatedPacket();
 	sentinelgrid::engine::testInvalidHeaders();
+
+	std::cout << "Running events queue management tests...\n\n";
 
 	sentinelgrid::engine::testFIFORoundTrip();
 	sentinelgrid::engine::testZeroCapacityDetection();
@@ -290,6 +514,15 @@ int main(void) {
 	sentinelgrid::engine::testBlockedConsumer();
 	sentinelgrid::engine::testWakesAblockedConsumer();
 	sentinelgrid::engine::testFullQueueBlock();
+
+	std::cout << "Running login attempts rules management tests...\n\n";
+
+	sentinelgrid::engine::testLoginRuleZeroAttempts();
+	sentinelgrid::engine::testAlertOnThirdFailure();
+	sentinelgrid::engine::testAgentIsolation();
+	sentinelgrid::engine::testIgnoreHeartbeat();
+	sentinelgrid::engine::testServiceStopReset();
+	sentinelgrid::engine::testAlertResetsCounter();
 
 	std::cout << "\nTests Completed: " << testCount << " checks, " << failCount << " failures.\n";
 		

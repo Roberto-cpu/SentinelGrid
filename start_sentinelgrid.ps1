@@ -43,5 +43,5 @@ Start-Sleep -Milliseconds 500
 Start-Process powershell.exe -ArgumentList `
     "-NoExit", "-Command", $agent1Command
 
-Start-Process powershell.exe -ArgumentList `
-    "-NoExit", "-Command", $agent2Command
+#Start-Process powershell.exe -ArgumentList `
+#    "-NoExit", "-Command", $agent2Command

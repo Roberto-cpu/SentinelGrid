@@ -12,8 +12,8 @@
  */
 typedef enum {
 	EVENT_HEARTBEAT = 1,
-	EVENT_SERVICE_STOP = 2,
-	EVENT_LOGIN_FAILED = 3
+	EVENT_LOGIN_FAILED = 2,
+	EVENT_SERVICE_STOP = 3
 } EventType;
 
 /*

@@ -28,22 +28,22 @@ int main(int argc, char* argv[]) {
 
 	printf("SentinelGrid agent %d started\n", options.agent_id);
 
-	SecurityEvent heartbeat = {
+	SecurityEvent login_failed1 = {
 		options.agent_id,
 		1ULL,
-		EVENT_HEARTBEAT
+		EVENT_LOGIN_FAILED
 	};
 	
-	SecurityEvent login_failed = {
+	SecurityEvent login_failed2 = {
 		options.agent_id,
 		2ULL,
 		EVENT_LOGIN_FAILED
 	};
 	
-	SecurityEvent service_stop = {
+	SecurityEvent login_failed3 = {
 		options.agent_id,
 		3ULL,
-		EVENT_SERVICE_STOP
+		EVENT_LOGIN_FAILED
 	};
 
 	uint8_t packet_h[EVENT_PACKET_SIZE] = { 0 };
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	if (!encodeEventPacket(&heartbeat, packet_h, sizeof packet_h)) {
+	if (!encodeEventPacket(&login_failed1, packet_h, sizeof packet_h)) {
 		printf("Unable to encode event packet.\n");
 		return EXIT_FAILURE;
 	}
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
 
 	printf("Heartbeat packet correctly sent.\n");
 
-	if (!encodeEventPacket(&login_failed, packet_l, sizeof packet_l)) {
+	if (!encodeEventPacket(&login_failed2, packet_l, sizeof packet_l)) {
 		printf("Unable to encode event packet.\n");
 		return EXIT_FAILURE;
 	}
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
 
 	printf("Login failed packet correctly sent.\n");
 
-	if (!encodeEventPacket(&service_stop, packet_s, sizeof packet_s)) {
+	if (!encodeEventPacket(&login_failed3, packet_s, sizeof packet_s)) {
 		printf("Unable to encode event packet.\n");
 		return EXIT_FAILURE;
 	}

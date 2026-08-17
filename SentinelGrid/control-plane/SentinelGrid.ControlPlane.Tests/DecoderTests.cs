@@ -115,7 +115,7 @@ public sealed class DecoderTests
         Assert.IsFalse(result.IsSuccess);
         Assert.AreEqual(EngineDecodeError.InvalidPayloadLength, result.Error);
     }
-    
+
     [TestMethod]
     public void TestInvalidAlertPayloadLength()
     {
@@ -205,5 +205,107 @@ public sealed class DecoderTests
         EngineDecodeResult result = EngineMessageDecoder.Decode(packet);
         Assert.IsFalse(result.IsSuccess);
         Assert.AreEqual(EngineDecodeError.InvalidFailureCount, result.Error);
+    }
+
+    [TestMethod]
+    public async Task TestReadValidEvent()
+    {
+        await using var stream = new MemoryStream(CreateValidEventPacket());
+        EngineFrameReadResult result = await EngineFrameReader.ReadAsync(stream);
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.IsInstanceOfType<SecurityEvent>(result.Message);
+    }
+
+    [TestMethod]
+    public async Task TestReadValidAlert()
+    {
+        await using var stream = new MemoryStream(CreateValidAlertPacket());
+        EngineFrameReadResult result = await EngineFrameReader.ReadAsync(stream);
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.IsInstanceOfType<SecurityAlert>(result.Message);
+    }
+
+    [TestMethod]
+    public async Task TestReadPeerClosed()
+    {
+        await using var stream = new MemoryStream(Array.Empty<byte>());
+        EngineFrameReadResult result = await EngineFrameReader.ReadAsync(stream);
+
+        Assert.IsFalse(result.IsSuccess);
+        Assert.AreEqual(EngineFrameReadStatus.PeerClosed, result.Status);
+    }
+
+    [TestMethod]
+    public async Task TestReadTruncatedHeader()
+    {
+        await using var stream = new MemoryStream(CreateValidEventPacket());
+
+        int offset = 0;
+        while (offset < 11)
+        {
+            byte[] buffer = new byte[offset + 1];
+            stream.Read(buffer, 0, buffer.Length);
+            var subStream = new MemoryStream(buffer);
+            EngineFrameReadResult result = await EngineFrameReader.ReadAsync(subStream);
+
+            Assert.IsFalse(result.IsSuccess);
+            Assert.AreEqual(EngineFrameReadStatus.TruncatedHeader, result.Status);
+
+            offset++;
+        }
+    }
+
+    [TestMethod]
+    public async Task TestTruncatedPayload()
+    {
+        await using var stream = new MemoryStream(CreateValidEventPacket());
+        byte[] buffer = new byte[EngineProtocolConstants.HeaderSize + 5];
+        stream.Read(buffer, 0, buffer.Length);
+        var subSream = new MemoryStream(buffer);
+
+        EngineFrameReadResult result = await EngineFrameReader.ReadAsync(subSream);
+
+        Assert.IsFalse(result.IsSuccess);
+        Assert.AreEqual(EngineFrameReadStatus.TruncatedPayload, result.Status);
+    }
+
+    [TestMethod]
+    public async Task TestInvalidFrame()
+    {
+        await using var stream = new MemoryStream(CreateValidEventPacket());
+        
+        byte[] buffer = new byte[EngineProtocolConstants.HeaderSize + EngineProtocolConstants.EventPayloadSize];
+        stream.Read(buffer, 0, buffer.Length);
+        buffer[3] = 0x00;
+        
+        var subSream = new MemoryStream(buffer);
+        EngineFrameReadResult result = await EngineFrameReader.ReadAsync(subSream);
+
+        Assert.IsFalse(result.IsSuccess);
+        Assert.AreEqual(EngineFrameReadStatus.InvalidFrame, result.Status);
+        Assert.AreEqual(EngineDecodeError.InvalidMagic, result.DecodeError);
+    }
+
+    [TestMethod]
+    public async Task TestCanecelledToken()
+    {
+        await using var stream = new MemoryStream(CreateValidEventPacket());
+        CancellationTokenSource cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        OperationCanceledException? capturedException = null;
+
+        try
+        {
+            await EngineFrameReader.ReadAsync(stream, cts.Token);
+        }
+        catch (OperationCanceledException e)
+        {
+            capturedException = e;
+        }
+
+        Assert.IsNotNull(capturedException);
     }
 }

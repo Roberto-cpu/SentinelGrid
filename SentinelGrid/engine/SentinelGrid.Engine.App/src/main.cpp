@@ -14,6 +14,8 @@
 #include <concurrency/bounded_blocking_queue.hpp>
 #include <agent_session.hpp>
 #include <rules/failed_login_rule.hpp>
+#include <network/tcp_client.hpp>
+#include <protocol/control_plane_encoder.hpp>
 
 int main() {
 	using namespace sentinelgrid::engine;
@@ -21,6 +23,7 @@ int main() {
 	using network::WinsockRuntime;
 	using network::UniqueSocket;
 	using network::TcpServer;
+	using network::TcpClient;
 	using EventQueue = concurrency::BoundedBlockingQueue<SecurityEvent>;
 
 
@@ -54,37 +57,104 @@ int main() {
 	std::cout << "SentinelGrid TCP server listening on: 127.0.0.1:5050.\n";
 	std::cout << "Waiting for Agent connection...\n";
 
+	TcpClient client;
+
+	if (!client.connect("127.0.0.1", 6060U)) {
+		std::cerr << "Unable to connect to the server on port 6060.\n";
+		return EXIT_FAILURE;
+	}
+
+	std::cout << "Client connected on 127.0.0.1:6060.\n";
+
+
+	std::atomic_bool publicationFailed{ false };
 	std::vector<app::SessionResult> sessionResults(AgentCount);
 	std::vector<std::jthread> sessionWorkers;
 	sessionWorkers.reserve(AgentCount);
 
+	FailedLoginRule loginRule{ 3 };
 	EventQueue eventQueue{ 4 };
+
 	std::size_t processedEvents{ 0 };
 	std::size_t totalEvents{ 0 };
 
 	std::jthread processor{
-		[&eventQueue, &processedEvents]() {
-			FailedLoginRule loginRule{ 3 };
+		[&eventQueue,&client, &loginRule, &processedEvents, &publicationFailed]() {
 
-			while (true) {
-				auto event = eventQueue.pop();
+			while (auto event = eventQueue.pop()) {
 
 				if (!event.has_value())
 					break;
 
-				processedEvents++;
+				std::cout << "Sending event: Agent=" << event->agent_id
+					<< ", Sequence=" << event->sequence_number
+					<< ", Type=" << eventTypeToString(event->type)
+					<< "\n";
+
+				std::array<std::uint8_t, protocol::EventPacketSize> eventFrame{};
+				const auto eventEncodeResult = protocol::encodeControlPlaneMessage(*event, eventFrame);
+				
+				if (!eventEncodeResult.is_success()) {
+					std::cerr << "Unable to encode the event.\n";
+					publicationFailed = true;
+					eventQueue.close();
+					break;
+				}
+
+				const auto eventSendResult = network::sendAll(
+					client.socket(), 
+					std::span<const std::uint8_t>{
+						eventFrame.data(), 
+						eventEncodeResult.byte_written
+					}
+				);
+
+				if (!eventSendResult.isSuccess()) {
+					std::cerr << "Unable to publish the event.\n"
+						<< "Sent bytes: " << eventSendResult.sentBytes
+						<< ", Error: " << eventSendResult.errorCode << "\n";
+					publicationFailed = true;
+					eventQueue.close();
+					break;
+				}
 
 				const auto loginAlert = loginRule.evaluate(*event);
+				if (loginAlert.has_value()) {
+					std::cout << "Sending alert: Type=" << alertTypeToString(loginAlert->type)
+						<< ", Severity=" << alertSeverityToString(loginAlert->severity)
+						<< ", Agent=" << loginAlert->agent_id
+						<< ", Sequence=" << loginAlert->triggering_sequence
+						<< " , Failures=" << loginAlert->failure_count
+						<< "\n";
 
-				if (loginAlert.has_value())
-					std::cout << "[ALERT] Agent " << loginAlert->agent_id
-					<< " generated " << loginAlert->failure_count
-					<< " failed login alerts. Trigger sequence: "
-					<< loginAlert->triggering_sequence << "\n";
-				else
-					std::cout << "Agent ID: " << event->agent_id
-					<< ", Sequence Number: " << event->sequence_number
-					<< ", Event Type: " << sentinelgrid::engine::eventTypeToString(event->type) << "\n";
+					std::array<std::uint8_t, protocol::AlertPacketSize> alertFrame{};
+					const auto alertEncodeResult = protocol::encodeControlPlaneMessage(*loginAlert, alertFrame);
+
+					if (!alertEncodeResult.is_success()) {
+						std::cerr << "Unable to encode alert.\n";
+						publicationFailed = true;
+						eventQueue.close();
+						break;
+					}
+
+					const auto alertSedResult = network::sendAll(
+						client.socket(),
+						std::span<const std::uint8_t> {
+							alertFrame.data(),
+							alertEncodeResult.byte_written
+						}
+					);
+
+					if (!alertSedResult.isSuccess()) {
+						std::cerr << "Unable to publish the alert.\n";
+						publicationFailed = true;
+						eventQueue.close();
+						break;
+					}
+
+				}
+
+				processedEvents++;
 			}
 
 			std::cout << "Event processor stopped.\n";

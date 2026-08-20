@@ -1,4 +1,5 @@
 ﻿using SentinelGrid.ControlPlane.Domain;
+using SentinelGrid.ControlPlane.Infrastructure.Persistence;
 using SentinelGrid.ControlPlane.Protocol;
 using System.Net.Sockets;
 
@@ -7,6 +8,16 @@ namespace SentinelGrid.ControlPane.Tests;
 [TestClass]
 public sealed class DecoderTests
 {
+    private static SecurityEvent CreateSecurityEventInstance(uint agent) { return new SecurityEvent(agent, 1UL, EventTypes.LoginFailed); }
+    private static SecurityAlert CreateSecurityAlertInstance(uint agent) { 
+        return new SecurityAlert(
+            AlertTypes.RepeatedLoginFailures,
+            AlertSeverities.High,
+            agent, 1UL,
+            3
+        ); 
+    }
+
     private static byte[] CreateValidEventPacket() =>
     [
         0x53, 0x47, 0x52, 0x44, // SGRD
@@ -307,5 +318,85 @@ public sealed class DecoderTests
         }
 
         Assert.IsNotNull(capturedException);
+    }
+
+    [TestMethod]
+    public async Task TestRepositoryAddEvent()
+    {
+        SecurityEvent securityEvent = CreateSecurityEventInstance(101U);
+        InMemorySecurityTelemetryRepository  repository = new InMemorySecurityTelemetryRepository();
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        await repository.StoreEventAsync(securityEvent, cancellationTokenSource.Token);
+        Assert.IsNotEmpty(repository.GetEventsSnapshot());
+    }
+    
+    [TestMethod]
+    public async Task TestRepositoryAddAlert()
+    {
+        SecurityAlert securityAlert = CreateSecurityAlertInstance(101U);
+        InMemorySecurityTelemetryRepository  repository = new InMemorySecurityTelemetryRepository();
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        await repository.StoreAlertAsync(securityAlert, cancellationTokenSource.Token);
+        Assert.IsNotEmpty(repository.GetAlertsSnapshot());
+    }
+
+    [TestMethod]
+    public async Task TestRepositoryCheckEventsFIFO()
+    {
+        SecurityEvent securityEvent1 = CreateSecurityEventInstance(101U);
+        SecurityEvent securityEvent2 = CreateSecurityEventInstance(102U);
+        InMemorySecurityTelemetryRepository repository = new InMemorySecurityTelemetryRepository();
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        await repository.StoreEventAsync(securityEvent1, cancellationTokenSource.Token);
+        await repository.StoreEventAsync(securityEvent2, cancellationTokenSource.Token);
+
+        Assert.AreEqual(101U, repository.GetEventsSnapshot()[0].AgentId);
+        Assert.AreEqual(102U, repository.GetEventsSnapshot()[1].AgentId);
+    }
+
+    [TestMethod]
+    public async Task TestRepositoryAddAlertWithCancelledToken()
+    {
+        SecurityAlert securityAlert = CreateSecurityAlertInstance(101U);
+        InMemorySecurityTelemetryRepository repository = new InMemorySecurityTelemetryRepository();
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        bool exceptionCaptured = false;
+
+        try
+        {
+            await repository.StoreAlertAsync(securityAlert, cancellationTokenSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            exceptionCaptured = true;
+        }
+
+        Assert.IsTrue(exceptionCaptured);
+    }
+
+    [TestMethod]
+    public async Task TestRepositoryAddNullAlert()
+    {
+        SecurityAlert securityAlert = null;
+        InMemorySecurityTelemetryRepository repository = new InMemorySecurityTelemetryRepository();
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+       
+        bool exceptionCaptured = false;
+
+        try
+        {
+            await repository.StoreAlertAsync(securityAlert, cancellationTokenSource.Token);
+        }
+        catch (ArgumentNullException)
+        {
+            exceptionCaptured = true;
+        }
+
+        Assert.IsTrue(exceptionCaptured);
     }
 }

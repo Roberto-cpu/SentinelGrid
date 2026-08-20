@@ -107,5 +107,29 @@ namespace sentinelgrid::engine {
 				return "Unknown Error";
 		}
 	}
+
+	std::string_view alertTypeToString(AlertType type) noexcept {
+		switch (type) {
+			case AlertType::repeated_login_failure:
+				return "Repeated Login Failures";
+			default:
+				return "Unknown Alert Type";
+		}
+	}
+	
+	std::string_view alertSeverityToString(AlertSeverity severity) noexcept {
+		switch (severity) {
+			case AlertSeverity::low:
+				return "Low";
+			case AlertSeverity::medium:
+				return "Medium";
+			case AlertSeverity::high:
+				return "High";
+			case AlertSeverity::critical:
+				return "Critical";
+			default:
+				return "Unkonwn Alert Severity";
+		}
+	}
 }
 

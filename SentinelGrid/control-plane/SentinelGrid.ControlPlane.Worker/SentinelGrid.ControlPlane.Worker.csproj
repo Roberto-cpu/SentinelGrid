@@ -5,9 +5,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-SentinelGrid.ControlPlane.Worker-bbbf594d-cdae-4d44-8123-478568f40e31</UserSecretsId>
+    <BaseOutputPath>C:\Users\rober\OneDrive\Documenti\SentinelGrid\SentinelGrid\control-plane\SentinelGrid.ControlPlane.Worker\bin</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SentinelGrid.ControlPlane.Application\SentinelGrid.ControlPlane.Application.csproj" />
+    <ProjectReference Include="..\SentinelGrid.ControlPlane.Domain\SentinelGrid.ControlPlane.Domain.csproj" />
+    <ProjectReference Include="..\SentinelGrid.ControlPlane.Infrastructure\SentinelGrid.ControlPlane.Infrastructure.csproj" />
+    <ProjectReference Include="..\SentinelGrid.ControlPlane.Protocol\SentinelGrid.ControlPlane.Protocol.csproj" />
   </ItemGroup>
 </Project>

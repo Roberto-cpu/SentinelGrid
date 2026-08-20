@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SentinelGrid.ControlPlane.Domain\SentinelGrid.ControlPlane.Domain.csproj" />
+    <ProjectReference Include="..\SentinelGrid.ControlPlane.Infrastructure\SentinelGrid.ControlPlane.Infrastructure.csproj" />
     <ProjectReference Include="..\SentinelGrid.ControlPlane.Protocol\SentinelGrid.ControlPlane.Protocol.csproj" />
   </ItemGroup>
 

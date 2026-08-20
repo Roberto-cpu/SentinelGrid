@@ -1,6 +1,7 @@
 #include <cstdint>	
 #include <climits>
 #include <WinSock2.h>
+#include <algorithm>
 
 #include <network/socket_io.hpp>
 
@@ -33,8 +34,8 @@ namespace sentinelgrid::engine::network {
 			if (received == 0) {
 				return {
 					ReceiveStatus::peer_closed,
-					0U,
-					WSAGetLastError()
+					totalReceived,
+					0
 				};
 			}
 
@@ -44,6 +45,57 @@ namespace sentinelgrid::engine::network {
 		return {
 			ReceiveStatus::success,
 			totalReceived,
+			0
+		};
+	}
+
+	SendResult sendAll(const UniqueSocket& socket, std::span<const std::uint8_t> data) noexcept {
+		if (!socket.isValid()) {
+			return {
+				SendStatus::socket_error,
+				0U,
+				WSAEINVAL
+			};
+		}
+
+		if (data.empty()) {
+			return {
+				SendStatus::connection_closed,
+				0U,
+				0
+			};
+		}
+
+		std::size_t totalSent = 0;
+		while (totalSent < data.size()) {
+			const std::size_t remaining = data.size() - totalSent;
+			const std::size_t chunkSize = std::min<std::size_t>(remaining, static_cast<const std::size_t>(INT_MAX));
+			const int requestedBytes = static_cast<int>(chunkSize);
+
+			const int sent = ::send(socket.get(), reinterpret_cast<const char*>(data.data() + totalSent), requestedBytes, 0);
+		
+			if (sent == SOCKET_ERROR) {
+				return {
+					SendStatus::socket_error,
+					totalSent,
+					WSAGetLastError()
+				};
+			}
+
+			if (sent == 0) {
+				return {
+					SendStatus::connection_closed,
+					totalSent,
+					0
+				};
+			}
+
+			totalSent += sent;
+		}
+
+		return {
+			SendStatus::success,
+			totalSent,
 			0
 		};
 	}

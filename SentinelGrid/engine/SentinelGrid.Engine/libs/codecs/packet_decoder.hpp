@@ -7,6 +7,7 @@
 #include <string_view>
 
 #include "security_event.hpp"
+#include <alerts/security_alerts.hpp>
 
 namespace sentinelgrid::engine {
 	inline constexpr std::uint32_t PacketMagic		= 0x53475244U;
@@ -33,4 +34,10 @@ namespace sentinelgrid::engine {
 
 	[[nodiscard]]
 	std::string_view decodeErrorToString(DecodeError err) noexcept;
+
+	[[nodiscard]]
+	std::string_view alertTypeToString(AlertType type) noexcept;
+
+	[[nodiscard]]
+	std::string_view alertSeverityToString(AlertSeverity severity) noexcept;
 }

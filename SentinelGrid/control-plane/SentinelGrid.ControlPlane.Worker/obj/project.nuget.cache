@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "PyfGWQmD8ZM=",
+  "dgSpecHash": "yv7ta3Fr3g4=",
   "success": true,
   "projectFilePath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Worker\\SentinelGrid.ControlPlane.Worker.csproj",
   "expectedPackageFiles": [
@@ -31,6 +31,7 @@
     "C:\\Users\\rober\\.nuget\\packages\\microsoft.extensions.options\\10.0.11\\microsoft.extensions.options.10.0.11.nupkg.sha512",
     "C:\\Users\\rober\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\10.0.11\\microsoft.extensions.options.configurationextensions.10.0.11.nupkg.sha512",
     "C:\\Users\\rober\\.nuget\\packages\\microsoft.extensions.primitives\\10.0.11\\microsoft.extensions.primitives.10.0.11.nupkg.sha512",
+    "C:\\Users\\rober\\.nuget\\packages\\npgsql\\10.0.3\\npgsql.10.0.3.nupkg.sha512",
     "C:\\Users\\rober\\.nuget\\packages\\system.diagnostics.eventlog\\10.0.11\\system.diagnostics.eventlog.10.0.11.nupkg.sha512"
   ],
   "logs": []

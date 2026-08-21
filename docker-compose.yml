@@ -1,0 +1,35 @@
+name: sentinelgrid
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
+    container_name: sentinelgrid-postgres
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "127.0.0.1:5433:5432"
+
+    volumes:
+      - sentinelgrid-postgres-data:/var/lib/postgresql/data
+      - ./SentinelGrid/control-plane/database/001_initial_schema.sql:/docker-entrypoint-initdb.d/001_initial_schema.sql:ro
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+    restart: unless-stopped
+
+volumes:
+  sentinelgrid-postgres-data:
+    name: sentinelgrid-postgres-data

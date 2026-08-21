@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <BaseOutputPath>C:\Users\rober\OneDrive\Documenti\SentinelGrid\SentinelGrid\control-plane\SentinelGrid.ControlPlane.Tests\bin</BaseOutputPath>
+    <UserSecretsId>fcb27302-4218-43a1-9401-6b1b72493874</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

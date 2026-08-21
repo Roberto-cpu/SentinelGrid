@@ -38,6 +38,9 @@
 *.exe
 *.out
 
+# Environment files
+.env
+
 # Build directories
 build/
 Build/

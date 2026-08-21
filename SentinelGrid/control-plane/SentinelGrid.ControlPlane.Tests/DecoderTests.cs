@@ -1,4 +1,6 @@
-﻿using SentinelGrid.ControlPlane.Domain;
+﻿using Microsoft.Extensions.Configuration;
+using Npgsql;
+using SentinelGrid.ControlPlane.Domain;
 using SentinelGrid.ControlPlane.Infrastructure.Persistence;
 using SentinelGrid.ControlPlane.Protocol;
 using System.Net.Sockets;
@@ -8,7 +10,7 @@ namespace SentinelGrid.ControlPane.Tests;
 [TestClass]
 public sealed class DecoderTests
 {
-    private static SecurityEvent CreateSecurityEventInstance(uint agent) { return new SecurityEvent(agent, 1UL, EventTypes.LoginFailed); }
+    private static SecurityEvent CreateSecurityEventInstance(uint agent) { return new SecurityEvent(agent, ulong.MaxValue, EventTypes.LoginFailed); }
     private static SecurityAlert CreateSecurityAlertInstance(uint agent) { 
         return new SecurityAlert(
             AlertTypes.RepeatedLoginFailures,
@@ -398,5 +400,124 @@ public sealed class DecoderTests
         }
 
         Assert.IsTrue(exceptionCaptured);
+    }
+
+    [TestClass]
+    public sealed class PostgreSqlConnectionTests {
+
+        [TestMethod]
+        public async Task StoreEvent()
+        {
+            IConfiguration configuration = new ConfigurationBuilder()
+                    .AddUserSecrets<PostgreSqlConnectionTests>(optional: false)
+                    .Build();
+
+            string connectionString =
+                configuration.GetConnectionString("SentinelGrid")
+                ?? throw new InvalidOperationException("Test connection string is missing.");
+
+            SecurityEvent securityEvent = CreateSecurityEventInstance(101U);
+            NpgsqlDataSource dataSource = NpgsqlDataSource.Create(connectionString);
+
+
+            PostrgresSqlSecurityTelemetryRepository repository = new PostrgresSqlSecurityTelemetryRepository(dataSource);
+
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            await repository.StoreEventAsync(securityEvent, cancellationTokenSource.Token);
+
+            await using NpgsqlCommand cmd = dataSource.CreateCommand("SELECT COUNT(*) FROM security_events");
+            object? result = await cmd.ExecuteScalarAsync();
+
+            Assert.IsGreaterThan(0, (long)result);
+        }
+
+        [TestMethod]
+        public async Task StoreEventTwoTimes()
+        {
+            IConfiguration configuration = new ConfigurationBuilder()
+                    .AddUserSecrets<PostgreSqlConnectionTests>(optional: false)
+                    .Build();
+
+            string connectionString =
+                configuration.GetConnectionString("SentinelGrid")
+                ?? throw new InvalidOperationException("Test connection string is missing.");
+
+            SecurityEvent securityEvent = CreateSecurityEventInstance(102U);
+            NpgsqlDataSource dataSource = NpgsqlDataSource.Create(connectionString);
+
+
+            PostrgresSqlSecurityTelemetryRepository repository = new PostrgresSqlSecurityTelemetryRepository(dataSource);
+
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            await repository.StoreEventAsync(securityEvent, cancellationTokenSource.Token);
+            await repository.StoreEventAsync(securityEvent, cancellationTokenSource.Token);
+
+            await using NpgsqlCommand cmd = dataSource.CreateCommand("SELECT COUNT(*) FROM security_events");
+            object? result = await cmd.ExecuteScalarAsync();
+
+            Assert.AreEqual(4, (long)result);
+        }
+
+        [TestMethod]
+        public async Task StoreEventMaxInt()
+        {
+            IConfiguration configuration = new ConfigurationBuilder()
+                    .AddUserSecrets<PostgreSqlConnectionTests>(optional: false)
+                    .Build();
+
+            string connectionString =
+                configuration.GetConnectionString("SentinelGrid")
+                ?? throw new InvalidOperationException("Test connection string is missing.");
+
+            SecurityEvent securityEvent = CreateSecurityEventInstance(uint.MaxValue);
+            NpgsqlDataSource dataSource = NpgsqlDataSource.Create(connectionString);
+
+
+            PostrgresSqlSecurityTelemetryRepository repository = new PostrgresSqlSecurityTelemetryRepository(dataSource);
+
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            await repository.StoreEventAsync(securityEvent, cancellationTokenSource.Token);
+            
+            await using NpgsqlCommand cmd = dataSource.CreateCommand("SELECT COUNT(*) FROM security_events");
+            object? result = await cmd.ExecuteScalarAsync();
+
+            Assert.AreEqual(4, (long)result);
+        }
+        
+        [TestMethod]
+        public async Task TokenException()
+        {
+            IConfiguration configuration = new ConfigurationBuilder()
+                    .AddUserSecrets<PostgreSqlConnectionTests>(optional: false)
+                    .Build();
+
+            string connectionString =
+                configuration.GetConnectionString("SentinelGrid")
+                ?? throw new InvalidOperationException("Test connection string is missing.");
+
+            SecurityEvent securityEvent = CreateSecurityEventInstance(uint.MaxValue);
+            NpgsqlDataSource dataSource = NpgsqlDataSource.Create(connectionString);
+
+
+            PostrgresSqlSecurityTelemetryRepository repository = new PostrgresSqlSecurityTelemetryRepository(dataSource);
+
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+
+            bool exception = false;
+
+            try {
+            await repository.StoreEventAsync(securityEvent, cancellationTokenSource.Token);
+            
+            await using NpgsqlCommand cmd = dataSource.CreateCommand("SELECT COUNT(*) FROM security_events");
+                object? result = await cmd.ExecuteScalarAsync();
+            }
+            catch(OperationCanceledException) { exception = true; }
+
+            Assert.IsTrue(exception);
+        }
     }
 }

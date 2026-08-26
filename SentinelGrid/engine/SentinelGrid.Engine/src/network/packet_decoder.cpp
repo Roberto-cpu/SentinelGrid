@@ -4,8 +4,9 @@
 #include <variant>
 #include <string_view>
 
-#include "../../libs/codecs/packet_decoder.hpp"
-#include "../../libs/codecs/security_event.hpp"
+#include <codecs/packet_decoder.hpp>
+#include <codecs/security_event.hpp>
+#include <hmac_sha256_verifier.hpp>
 
 namespace {
 	std::uint16_t readUint16BigEndian(std::span<const uint8_t> bytes, std::size_t offset) noexcept {
@@ -34,7 +35,7 @@ namespace {
 		const auto byte6 = static_cast<std::uint64_t>(bytes[offset + 6]);
 		const auto byte7 = static_cast<std::uint64_t>(bytes[offset + 7]);
 
-		return static_cast<std::uint16_t>(
+		return static_cast<std::uint64_t>(
 			(byte0 << 56) | (byte1 << 48) | (byte2 << 40) |
 			(byte3 << 32) | (byte4 << 24) | (byte5 << 16) |
 			(byte6 << 8)  | byte7
@@ -44,8 +45,9 @@ namespace {
 
 namespace sentinelgrid::engine {
 
-	DecodeResult decodeEventPacket(std::span<const std::uint8_t> packet) noexcept {
-		if (packet.size() < EventPacketSize || (packet.size() - PacketHeaderSize) < EventPayloadSize)
+	DecodeResult decodeEventPacket(std::span<const std::uint8_t> packet) noexcept 
+	{
+		if (packet.size() < EventPacketSize)
 			return DecodeError::packetTooSmall;
 
 		std::uint32_t magic = readUint32BigEndian(packet, 0);
@@ -75,6 +77,70 @@ namespace sentinelgrid::engine {
 			.agent_id = agent_id,
 			.sequence_number = sequence_number,
 			.type = eventType
+		};
+	}
+
+	DecodeResult decodeAuthenticatedEventPacket(
+		std::span<const std::uint8_t> packet,
+		std::uint32_t expectedKeyId,
+		std::span<const std::uint8_t> key) noexcept {
+		
+		if (packet.size() < AuthenticatedPacketSize || (packet.size() - PacketHeaderSize) < AuthenticatedBodySize)
+			return DecodeError::packetTooSmall;
+
+		std::uint32_t magic = readUint32BigEndian(packet, 0U);
+
+		if (magic != PacketMagic)
+			return DecodeError::invalidMagic;
+
+		std::uint16_t protocol = readUint16BigEndian(packet, 4U);
+
+		if (protocol != ProtocolVersionV2)
+			return DecodeError::unsupportedVersion;
+
+		std::uint16_t bodyLength = readUint16BigEndian(packet, 6U);
+
+		if (bodyLength != AuthenticatedBodySize)
+			return DecodeError::invalidPayloadLength;
+
+		std::size_t keyId = readUint32BigEndian(packet, KeyIdOffset);
+		if (keyId != expectedKeyId)
+			return DecodeError::authenticationFailed;
+
+		const auto authenticatedData = packet.first(security::authenticatedDataSize);
+		const auto receivedMac = packet.subspan(HmacSha256Offset, security::hmacSha256Size);
+
+		const auto authResult = security::verifyHmacSha256(key, authenticatedData, receivedMac);
+		switch (authResult) {
+			case security::HmacVerificationResult::valid:
+				break;
+
+			case security::HmacVerificationResult::calculation_failed:
+				return DecodeError::cryptographicFailure;
+
+			case security::HmacVerificationResult::mismatch:
+			case security::HmacVerificationResult::invalid_input:
+
+			default:
+				return DecodeError::authenticationFailed;
+		}
+
+		std::uint32_t agent_id = readUint32BigEndian(packet, 8U);
+		
+		std::uint64_t sequence = readUint64BigEndian(packet, 12U);
+		
+		std::uint32_t eventType = readUint32BigEndian(packet, 20U);
+
+		if (eventType != static_cast<std::uint32_t>(EventType::heartbeat)	 &&
+			eventType != static_cast<std::uint32_t>(EventType::login_failed) &&
+			eventType != static_cast<std::uint32_t>(EventType::service_stop))
+			return DecodeError::invalidEventType;
+
+		const auto type = static_cast<EventType>(eventType);
+		return SecurityEvent{
+			.agent_id = agent_id,
+			.sequence_number = sequence,
+			.type = type
 		};
 	}
 

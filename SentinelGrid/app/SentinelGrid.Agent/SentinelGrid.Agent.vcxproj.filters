@@ -32,6 +32,9 @@
     <ClInclude Include="include\agent\sockets\tcp_client.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="include\agent\security\security.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\collections\buffer_codec.c">
@@ -47,6 +50,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="src\sockets\tcp_client.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\security\security.c">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

@@ -6,7 +6,8 @@
 namespace sentinelgrid::engine {
 
 	enum class AlertType : std::uint32_t {
-		repeated_login_failure = 1
+		repeated_login_failure = 1,
+		malicious_request = 2
 	};
 
 	enum class AlertSeverity : std::uint32_t {

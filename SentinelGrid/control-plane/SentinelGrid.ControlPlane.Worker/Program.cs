@@ -11,9 +11,9 @@ var builder = Host.CreateApplicationBuilder(args);
 string connectionString = builder.Configuration.GetConnectionString("SentinelGrid") 
     ?? throw new InvalidOperationException("SentinelGrid PosgreSQL connection string missed");
 
-builder.Services.AddSingleton(NpgsqlDataSource.Create(connectionString));
+builder.Services.AddSingleton<NpgsqlDataSource>(_ => NpgsqlDataSource.Create(connectionString));
 builder.Services.AddSingleton(new EngineMessageQueue(capacity: 128));
-builder.Services.AddSingleton<ISecurityTelemetryRepository, InMemorySecurityTelemetryRepository>();
+builder.Services.AddSingleton<ISecurityTelemetryRepository, PostrgresSqlSecurityTelemetryRepository>();
 builder.Services.AddHostedService<MessageProcessingWorker>();
 builder.Services.AddHostedService<EngineTcpIngestionWorker>();
 

@@ -14,13 +14,15 @@
 
 namespace sentinelgrid::engine::app {
 
-	SessionResult runSessionAgent(network::UniqueSocket client, EventQueue& eventQueue) {
+	SessionResult runSessionAgent(network::UniqueSocket client, EventQueue& eventQueue,
+		std::uint32_t keyId, std::span<const std::uint8_t> agentKey)
+	{
 		std::size_t receivedEvents{ 0 };
 		SessionStatus status{ SessionStatus::cleanDisconnect };
 		int socketCode{ 0 };
 
 		while (true) {
-			std::array<std::uint8_t, sentinelgrid::engine::EventPacketSize> packet{};
+			std::array<std::uint8_t, sentinelgrid::engine::AuthenticatedPacketSize> packet{};
 			const auto receiveRes = sentinelgrid::engine::network::receiveExactly(client, packet);
 
 
@@ -48,7 +50,8 @@ namespace sentinelgrid::engine::app {
 				}
 			}
 
-			const auto decodeRes = sentinelgrid::engine::decodeEventPacket(packet);
+			//const auto decodeRes = sentinelgrid::engine::decodeEventPacket(packet);
+			const auto decodeRes = sentinelgrid::engine::decodeAuthenticatedEventPacket(packet, keyId, agentKey);
 			if (const auto* event = std::get_if<sentinelgrid::engine::SecurityEvent>(&decodeRes)) {
 
 				if (!eventQueue.push(*event)) {

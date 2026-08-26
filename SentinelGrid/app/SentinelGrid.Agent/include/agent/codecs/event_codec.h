@@ -7,7 +7,8 @@
 
 #include "security_event.h"
 
-#define SERIALIZED_EVENT_SIZE 16u
+#define SERIALIZED_EVENT_SIZE	 16U
+#define AUTHENTICATED_EVENT_SIZE 52U
 
 /*
  * @brief Serializes a given event data into a given bytes array of a 16 byte length

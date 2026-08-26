@@ -6,7 +6,8 @@ namespace SentinelGrid.ControlPlane.Domain;
 
 public enum AlertTypes : uint
 {
-    RepeatedLoginFailures = 1
+    RepeatedLoginFailures = 1,
+    MaliciousRequest = 2
 };
 
 public enum AlertSeverities : uint

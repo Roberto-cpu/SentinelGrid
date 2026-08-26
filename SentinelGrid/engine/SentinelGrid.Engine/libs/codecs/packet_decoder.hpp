@@ -16,12 +16,21 @@ namespace sentinelgrid::engine {
 	inline constexpr std::size_t   PacketHeaderSize = 8U;
 	inline constexpr std::size_t   EventPacketSize	= 24U;
 
+	inline constexpr std::uint32_t ProtocolVersionV2	   = 0x0002U;
+	inline constexpr std::uint16_t KeyIdSize			   = 4U;
+	inline constexpr std::uint16_t AuthenticatedBodySize   = 52U;
+	inline constexpr std::size_t   AuthenticatedPacketSize = 60U;
+	inline constexpr std::size_t   KeyIdOffset			   = 24U;
+	inline constexpr std::size_t   HmacSha256Offset		   = 28U;
+
 	enum class DecodeError {
-		packetTooSmall,
-		invalidMagic,
-		unsupportedVersion,
-		invalidPayloadLength,
-		invalidEventType
+		packetTooSmall = 1,
+		invalidMagic = 2,
+		unsupportedVersion = 3,
+		invalidPayloadLength = 4,
+		invalidEventType = 5,
+		authenticationFailed = 6,
+		cryptographicFailure = 7
 	};
 
 	using DecodeResult = std::variant<SecurityEvent, DecodeError>;
@@ -29,6 +38,12 @@ namespace sentinelgrid::engine {
 	[[nodiscard]]
 	DecodeResult decodeEventPacket(std::span<const std::uint8_t> packet) noexcept;
 
+	[[nodiscard]] 
+	DecodeResult decodeAuthenticatedEventPacket(
+		std::span<const std::uint8_t> packet,
+		std::uint32_t expectedKeyId,
+		std::span<const std::uint8_t> key) noexcept;
+		
 	[[nodiscard]]
 	std::string_view eventTypeToString(EventType type) noexcept;
 

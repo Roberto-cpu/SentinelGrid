@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <span>
 
 #include <codecs/security_event.hpp>
 #include <concurrency/bounded_blocking_queue.hpp>
@@ -24,5 +25,10 @@ namespace sentinelgrid::engine::app {
 	};
 
 	[[nodiscard]]
-	SessionResult runSessionAgent(network::UniqueSocket client, EventQueue& eventQueue);
+	SessionResult runSessionAgent(
+		network::UniqueSocket client, 
+		EventQueue& eventQueue,
+		std::uint32_t keyId, 
+		std::span<const std::uint8_t> agentKey
+	);
 }

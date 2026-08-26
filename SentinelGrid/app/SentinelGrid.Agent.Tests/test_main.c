@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <agent/codecs/buffer_codec.h>
 #include <agent/codecs/event_codec.h>
@@ -237,6 +238,40 @@ static void testTruncatedPacket(void) {
 		EXPECT_TRUE(!decodeEventPacket(bytes, size, &decodedEvent));
 }
 
+static void testHMAC_SHA256Encoding() {
+	printf("Testing MAC SHA-256 encoding...\n");
+
+	uint8_t key[] = {
+		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+		0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+		0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+		0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
+	};
+
+	SecurityEvent securityEvent = {
+		1U,
+		1UL,
+		EVENT_SERVICE_STOP
+	};
+
+	uint8_t expetedMAC[HMAC_SHA256_SIZE] = {
+		0xA5, 0x41, 0x4B, 0x2B,
+		0x55, 0x00, 0x7B, 0xB8,
+		0x12, 0x9D, 0xA7, 0xA3,
+		0xFD, 0xCD, 0x05, 0x6B,
+		0xE0, 0xBB, 0xC0, 0x1B,
+		0x49, 0xA4, 0xFB, 0x3D,
+		0xF7, 0x01, 0x27, 0x82,
+		0xCC, 0xC6, 0x80, 0xCE
+	};
+
+	uint8_t output[AUTHENTICATED_PACKET_SIZE] = { 0 };
+	int encoded = encodeAuthenticatedEvent(&securityEvent, 1U, key, sizeof(key), output);
+
+	EXPECT_TRUE(encoded == 1);
+	EXPECT_TRUE(memcmp(output + AUTHENTICATED_DATA_SIZE, expetedMAC, HMAC_SHA256_SIZE) == 0);
+}
+
 int main(void) {
 	printf("SentinelGrig Agent Tests start\n\n");
 
@@ -249,6 +284,8 @@ int main(void) {
 	testPacketRoundTrip();
 	testInvalidPacketHeader();
 	testTruncatedPacket();
+
+	testHMAC_SHA256Encoding();
 
 	printf(
 		"\nTests Completed: %d checks, %d failures\n",

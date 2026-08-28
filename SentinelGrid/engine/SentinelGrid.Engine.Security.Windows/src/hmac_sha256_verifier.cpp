@@ -10,7 +10,7 @@
 #include <array>
 #include <cstdint>
 
-#include <hmac_sha256_verifier.hpp>
+#include <security/hmac_sha256_verifier.hpp>
 
 namespace sentinelgrid::engine::security {
 

@@ -1,9 +1,17 @@
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+
+#include <Windows.h>
 #include <cstdlib>
 #include <iostream>
 #include <array>
 #include <thread>
 #include <variant>
 #include <cstddef>
+#include <atomic>
+#include <cstdint>
+#include <span>
+#include <type_traits>
 #include <vector>
 
 #include <network/winsock_runtime.hpp>
@@ -16,19 +24,7 @@
 #include <rules/failed_login_rule.hpp>
 #include <network/tcp_client.hpp>
 #include <protocol/control_plane_encoder.hpp>
-
-std::uint32_t DevelopmentKeyId = 1U;
-std::array<std::uint8_t, 32>
-	DevelopmentAgentKey{
-		0x00, 0x01, 0x02, 0x03,
-		0x04, 0x05, 0x06, 0x07,
-		0x08, 0x09, 0x0A, 0x0B,
-		0x0C, 0x0D, 0x0E, 0x0F,
-		0x10, 0x11, 0x12, 0x13,
-		0x14, 0x15, 0x16, 0x17,
-		0x18, 0x19, 0x1A, 0x1B,
-		0x1C, 0x1D, 0x1E, 0x1F
-};
+#include <security/agent_key_registry.hpp>
 
 int main() {
 	using namespace sentinelgrid::engine;
@@ -39,6 +35,43 @@ int main() {
 	using network::TcpClient;
 	using EventQueue = concurrency::BoundedBlockingQueue<SecurityEvent>;
 
+
+	security::AgentKeyRegistry keyRegistry;
+
+	security::AgentKey agentOneKey{
+		0x00, 0x01, 0x02, 0x03,
+		0x04, 0x05, 0x06, 0x07,
+		0x08, 0x09, 0x0A, 0x0B,
+		0x0C, 0x0D, 0x0E, 0x0F,
+		0x10, 0x11, 0x12, 0x13,
+		0x14, 0x15, 0x16, 0x17,
+		0x18, 0x19, 0x1A, 0x1B,
+		0x1C, 0x1D, 0x1E, 0x1F
+	};
+
+	security::AgentKey agentTwoKey{
+		0x00, 0x01, 0x02, 0x03,
+		0x04, 0x05, 0x06, 0x07,
+		0x08, 0x09, 0x0A, 0x0B,
+		0x0C, 0x0D, 0x0E, 0x0F,
+		0x10, 0x11, 0x12, 0x13,
+		0x14, 0x15, 0x16, 0x17,
+		0x18, 0x19, 0x1A, 0x1B,
+		0x1C, 0x1D, 0x1E, 0x1F
+	};
+
+	if (!keyRegistry.registerKey(1U, 1U, agentOneKey)) {
+		std::cerr << "Unable to register agent key.\n";
+		return EXIT_FAILURE;
+	}
+	
+	if (!keyRegistry.registerKey(1U, 2U, agentTwoKey)) {
+		std::cerr << "Unable to register agent key.\n";
+		return EXIT_FAILURE;
+	}
+
+	SecureZeroMemory(agentOneKey.data(), agentOneKey.size());
+	SecureZeroMemory(agentTwoKey.data(), agentTwoKey.size());
 
 	std::cout << "SentinelGrid Engine start.\n\n";
 
@@ -185,13 +218,8 @@ int main() {
 		std::cout << "Opened session for agent \"" << (i + 1) << "\".\n";
 
 		sessionWorkers.emplace_back(
-			[client = std::move(client), &eventQueue, &sessionResults, i]() mutable {
-					sessionResults[i] = app::runSessionAgent(std::move(client), eventQueue, 
-						DevelopmentKeyId, std::span<const std::uint8_t>{ 
-							DevelopmentAgentKey.data(),
-							DevelopmentAgentKey.size()
-						}
-					);
+			[client = std::move(client), &eventQueue, &sessionResults, i, &keyRegistry]() mutable {
+					sessionResults[i] = app::runSessionAgent(std::move(client), eventQueue, keyRegistry);
 				}
 			);
 	}

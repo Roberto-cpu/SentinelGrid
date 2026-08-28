@@ -167,9 +167,11 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="lib\hmac_sha256_verifier.hpp" />
+    <ClInclude Include="lib\security\agent_key_registry.hpp" />
+    <ClInclude Include="lib\security\hmac_sha256_verifier.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\agent_key_registry.cpp" />
     <ClCompile Include="src\hmac_sha256_verifier.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

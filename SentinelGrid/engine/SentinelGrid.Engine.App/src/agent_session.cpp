@@ -10,12 +10,13 @@
 #include <network/unique_socket.hpp>
 #include <network/socket_io.hpp>
 #include <codecs/packet_decoder.hpp>
+#include <security/agent_key_registry.hpp>
 
 
 namespace sentinelgrid::engine::app {
 
 	SessionResult runSessionAgent(network::UniqueSocket client, EventQueue& eventQueue,
-		std::uint32_t keyId, std::span<const std::uint8_t> agentKey)
+		const sentinelgrid::engine::security::AgentKeyRegistry& keyRegistry)
 	{
 		std::size_t receivedEvents{ 0 };
 		SessionStatus status{ SessionStatus::cleanDisconnect };
@@ -51,7 +52,7 @@ namespace sentinelgrid::engine::app {
 			}
 
 			//const auto decodeRes = sentinelgrid::engine::decodeEventPacket(packet);
-			const auto decodeRes = sentinelgrid::engine::decodeAuthenticatedEventPacket(packet, keyId, agentKey);
+			const auto decodeRes = sentinelgrid::engine::decodeAuthenticatedEventPacket(packet, keyRegistry);
 			if (const auto* event = std::get_if<sentinelgrid::engine::SecurityEvent>(&decodeRes)) {
 
 				if (!eventQueue.push(*event)) {

@@ -8,6 +8,7 @@
 
 #include "security_event.hpp"
 #include <alerts/security_alerts.hpp>
+#include <security/agent_key_registry.hpp>
 
 namespace sentinelgrid::engine {
 	inline constexpr std::uint32_t PacketMagic		= 0x53475244U;
@@ -30,7 +31,8 @@ namespace sentinelgrid::engine {
 		invalidPayloadLength = 4,
 		invalidEventType = 5,
 		authenticationFailed = 6,
-		cryptographicFailure = 7
+		cryptographicFailure = 7,
+		invalidPacketSize = 8
 	};
 
 	using DecodeResult = std::variant<SecurityEvent, DecodeError>;
@@ -41,8 +43,7 @@ namespace sentinelgrid::engine {
 	[[nodiscard]] 
 	DecodeResult decodeAuthenticatedEventPacket(
 		std::span<const std::uint8_t> packet,
-		std::uint32_t expectedKeyId,
-		std::span<const std::uint8_t> key) noexcept;
+		const security::AgentKeyRegistry& keyRegistry) noexcept;
 		
 	[[nodiscard]]
 	std::string_view eventTypeToString(EventType type) noexcept;

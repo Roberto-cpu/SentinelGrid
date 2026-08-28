@@ -6,7 +6,8 @@
 
 #include <codecs/packet_decoder.hpp>
 #include <codecs/security_event.hpp>
-#include <hmac_sha256_verifier.hpp>
+#include <security/hmac_sha256_verifier.hpp>
+#include <security/agent_key_registry.hpp>
 
 namespace {
 	std::uint16_t readUint16BigEndian(std::span<const uint8_t> bytes, std::size_t offset) noexcept {
@@ -82,11 +83,14 @@ namespace sentinelgrid::engine {
 
 	DecodeResult decodeAuthenticatedEventPacket(
 		std::span<const std::uint8_t> packet,
-		std::uint32_t expectedKeyId,
-		std::span<const std::uint8_t> key) noexcept {
+		const sentinelgrid::engine::security::AgentKeyRegistry& keyRegistry
+	) noexcept 
+	{
 		
-		if (packet.size() < AuthenticatedPacketSize || (packet.size() - PacketHeaderSize) < AuthenticatedBodySize)
-			return DecodeError::packetTooSmall;
+		if (packet.size() != AuthenticatedPacketSize)
+			return packet.size() < AuthenticatedPacketSize ? 
+				DecodeError::packetTooSmall : 
+				DecodeError::invalidPacketSize;
 
 		std::uint32_t magic = readUint32BigEndian(packet, 0U);
 
@@ -104,21 +108,23 @@ namespace sentinelgrid::engine {
 			return DecodeError::invalidPayloadLength;
 
 		std::size_t keyId = readUint32BigEndian(packet, KeyIdOffset);
-		if (keyId != expectedKeyId)
+		
+		const auto agent = keyRegistry.findCredential(keyId);
+		if (!agent.has_value())
 			return DecodeError::authenticationFailed;
 
 		const auto authenticatedData = packet.first(security::authenticatedDataSize);
 		const auto receivedMac = packet.subspan(HmacSha256Offset, security::hmacSha256Size);
 
-		const auto authResult = security::verifyHmacSha256(key, authenticatedData, receivedMac);
+		const auto authResult = security::verifyHmacSha256(agent->key, authenticatedData, receivedMac);
 		switch (authResult) {
 			case security::HmacVerificationResult::valid:
 				break;
 
-			case security::HmacVerificationResult::calculation_failed:
+			case security::HmacVerificationResult::mismatch:
 				return DecodeError::cryptographicFailure;
 
-			case security::HmacVerificationResult::mismatch:
+			case security::HmacVerificationResult::calculation_failed:
 			case security::HmacVerificationResult::invalid_input:
 
 			default:
@@ -126,9 +132,10 @@ namespace sentinelgrid::engine {
 		}
 
 		std::uint32_t agent_id = readUint32BigEndian(packet, 8U);
-		
+		if (agent_id != agent.value().agent_id)
+			return DecodeError::authenticationFailed;
+
 		std::uint64_t sequence = readUint64BigEndian(packet, 12U);
-		
 		std::uint32_t eventType = readUint32BigEndian(packet, 20U);
 
 		if (eventType != static_cast<std::uint32_t>(EventType::heartbeat)	 &&

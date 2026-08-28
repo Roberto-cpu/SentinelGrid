@@ -28,7 +28,6 @@ namespace sentinelgrid::engine::app {
 	SessionResult runSessionAgent(
 		network::UniqueSocket client, 
 		EventQueue& eventQueue,
-		std::uint32_t keyId, 
-		std::span<const std::uint8_t> agentKey
+		const sentinelgrid::engine::security::AgentKeyRegistry& keyRegistry
 	);
 }

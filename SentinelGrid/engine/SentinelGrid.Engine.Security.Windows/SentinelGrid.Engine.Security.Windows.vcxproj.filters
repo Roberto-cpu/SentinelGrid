@@ -15,12 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lib\hmac_sha256_verifier.hpp">
+    <ClInclude Include="lib\security\hmac_sha256_verifier.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\security\agent_key_registry.hpp">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\hmac_sha256_verifier.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\agent_key_registry.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

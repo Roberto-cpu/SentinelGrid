@@ -6,6 +6,8 @@
 #include <codecs/security_event.hpp>
 #include <concurrency/bounded_blocking_queue.hpp>
 #include <network/unique_socket.hpp>
+#include <security/agent_key_registry.hpp>
+#include <security/replay_guard.hpp>
 
 namespace sentinelgrid::engine::app {
 	using EventQueue = concurrency::BoundedBlockingQueue<SecurityEvent>;
@@ -15,7 +17,8 @@ namespace sentinelgrid::engine::app {
 		truncatedPacket,
 		socketError,
 		decodingError,
-		queueClosed
+		queueClosed,
+		replayRejected
 	};
 
 	struct SessionResult {
@@ -28,6 +31,7 @@ namespace sentinelgrid::engine::app {
 	SessionResult runSessionAgent(
 		network::UniqueSocket client, 
 		EventQueue& eventQueue,
-		const sentinelgrid::engine::security::AgentKeyRegistry& keyRegistry
+		const security::AgentKeyRegistry& keyRegistry,
+		security::ReplayGuard& replayGuard
 	);
 }

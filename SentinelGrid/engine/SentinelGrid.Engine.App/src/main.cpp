@@ -25,6 +25,7 @@
 #include <network/tcp_client.hpp>
 #include <protocol/control_plane_encoder.hpp>
 #include <security/agent_key_registry.hpp>
+#include <security/replay_guard.hpp>
 
 int main() {
 	using namespace sentinelgrid::engine;
@@ -37,6 +38,7 @@ int main() {
 
 
 	security::AgentKeyRegistry keyRegistry;
+	security::ReplayGuard replayGuard;
 
 	security::AgentKey agentOneKey{
 		0x00, 0x01, 0x02, 0x03,
@@ -218,8 +220,8 @@ int main() {
 		std::cout << "Opened session for agent \"" << (i + 1) << "\".\n";
 
 		sessionWorkers.emplace_back(
-			[client = std::move(client), &eventQueue, &sessionResults, i, &keyRegistry]() mutable {
-					sessionResults[i] = app::runSessionAgent(std::move(client), eventQueue, keyRegistry);
+			[client = std::move(client), &eventQueue, &sessionResults, i, &keyRegistry, &replayGuard]() mutable {
+					sessionResults[i] = app::runSessionAgent(std::move(client), eventQueue, keyRegistry, replayGuard);
 				}
 			);
 	}

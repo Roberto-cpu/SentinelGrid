@@ -11,12 +11,13 @@
 #include <network/socket_io.hpp>
 #include <codecs/packet_decoder.hpp>
 #include <security/agent_key_registry.hpp>
+#include <security/replay_guard.hpp>
 
 
 namespace sentinelgrid::engine::app {
 
 	SessionResult runSessionAgent(network::UniqueSocket client, EventQueue& eventQueue,
-		const sentinelgrid::engine::security::AgentKeyRegistry& keyRegistry)
+		const security::AgentKeyRegistry& keyRegistry, security::ReplayGuard& replayGuard)
 	{
 		std::size_t receivedEvents{ 0 };
 		SessionStatus status{ SessionStatus::cleanDisconnect };
@@ -54,6 +55,13 @@ namespace sentinelgrid::engine::app {
 			//const auto decodeRes = sentinelgrid::engine::decodeEventPacket(packet);
 			const auto decodeRes = sentinelgrid::engine::decodeAuthenticatedEventPacket(packet, keyRegistry);
 			if (const auto* event = std::get_if<sentinelgrid::engine::SecurityEvent>(&decodeRes)) {
+				
+				const auto replayRes = replayGuard.checkAndRecord(event->agent_id, event->sequence_number);
+				if (replayRes != security::ReplayDecision::accepted) {
+					std::cerr << "Replay protection rejected the event.\n";
+					status == SessionStatus::replayRejected;
+					break;
+				}
 
 				if (!eventQueue.push(*event)) {
 					std::cerr << "Unable to push the event into the queue.\n";

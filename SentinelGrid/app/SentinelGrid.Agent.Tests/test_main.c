@@ -1,3 +1,15 @@
+/*
+ * @file test_main.c
+ * @brief Unit tests for SentinelGrid Agent codecs and buffer management.
+ *
+ * This file contains unit tests for the SentinelGrid Agent, focusing on the validation of event types,
+ * serialization and deserialization of security events, circular buffer management, packet encoding and decoding,
+ * and HMAC SHA-256 encoding. The tests ensure that the agent's components function correctly and handle edge cases.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -24,6 +36,12 @@ static int failCount = 0;
 		}									\
 	} while(0)								\
 
+/**
+ * @brief Tests the validation of event types.
+ *
+ * This function tests the isValidEventType function to ensure that it correctly identifies valid and invalid event types.
+ * It checks known valid event types and verifies that invalid event types are rejected.
+ */
 static void testEventTypeValidation(void) {
 	printf("Testing event-type validation...\n");
 
@@ -35,6 +53,13 @@ static void testEventTypeValidation(void) {
 	EXPECT_TRUE(!isValidEventType((EventType)100));
 }
 
+/**
+ * @brief Tests the serialization and deserialization of security events.
+ *
+ * This function tests the serialization and deserialization of SecurityEvent structures to ensure that
+ * the process is lossless. It creates an original SecurityEvent, serializes it, then deserializes it back
+ * and compares the original and decoded events for equality.
+ */
 static void testSerializationRoundTrip(void) {
 	printf("Testing serialiaztion round-trip...\n");
 
@@ -55,6 +80,13 @@ static void testSerializationRoundTrip(void) {
 	EXPECT_TRUE(decodedEvent.type == originalEvent.type);
 }
 
+/**
+ * @brief Tests the validity checks for codec arguments.
+ *
+ * This function tests the argument validation of serialization and deserialization functions to ensure that
+ * they correctly handle null pointers and insufficient buffer sizes. It verifies that the functions return
+ * false when provided with invalid arguments.
+ */
 static void testInvalidCodecArgument(void) {
 	printf("Testing codec arguments validity checks...\n");
 
@@ -76,6 +108,11 @@ static void testInvalidCodecArgument(void) {
 	EXPECT_TRUE(!deserializeEvent(encodedEvent, 15, &decodedEvent));
 }
 
+/**
+ * @brief Tests the circular buffer wrap-around behavior.
+ *
+ * This function tests the circular buffer implementation to ensure that it correctly handles wrap-around scenarios when adding events beyond its capacity.
+ */
 static void testCircularBufferWrapAround(void) {
 	printf("Test buffer round-trip...\n");
 
@@ -138,6 +175,13 @@ static void testCircularBufferWrapAround(void) {
 	EXPECT_TRUE(buffer.count == 0);
 }
 
+/**
+ * @brief Tests the encoding and decoding of event packets.
+ *
+ * This function tests the encoding and decoding of security event packets to ensure that the process is lossless.
+ * It creates an original SecurityEvent, encodes it into a packet, then decodes it back and compares the original
+ * and decoded events for equality.
+ */
 static void testPacketRoundTrip(void) {
 	printf("Testing packet encoding round-trip...\n");
 
@@ -158,6 +202,13 @@ static void testPacketRoundTrip(void) {
 	EXPECT_TRUE(heartbeat.type == decodedEvent.type);
 }
 
+/**
+ * @brief Tests the decoding of packets with invalid headers.
+ *
+ * This function tests the decoding of security event packets with intentionally corrupted headers to ensure that
+ * the decoder correctly identifies and rejects invalid packets. It verifies that the original event remains unchanged
+ * after attempting to decode an invalid packet.
+ */
 static void testInvalidPacketHeader(void) {
 	printf("Testing invalid packet header...\n");
 
@@ -220,6 +271,13 @@ static void testInvalidPacketHeader(void) {
 	EXPECT_TRUE(protectedEvent3.type == EVENT_HEARTBEAT);
 }
 
+/**
+ * @brief Tests the decoding of truncated packets.
+ *
+ * This function tests the decoding of security event packets that are intentionally truncated to ensure that
+ * the decoder correctly identifies and rejects incomplete packets. It verifies that the decoder returns false
+ * for all truncated packet sizes.
+ */
 static void testTruncatedPacket(void) {
 	printf("Testing truncated packet decoding...\n");
 
@@ -238,6 +296,13 @@ static void testTruncatedPacket(void) {
 		EXPECT_TRUE(!decodeEventPacket(bytes, size, &decodedEvent));
 }
 
+/**
+ * @brief Tests the HMAC SHA-256 encoding of authenticated event packets.
+ *
+ * This function tests the encoding of authenticated security event packets using HMAC SHA-256 to ensure that
+ * the generated MAC matches the expected value. It verifies that the encoding function returns success and
+ * that the computed MAC is correct.
+ */
 static void testHMAC_SHA256Encoding() {
 	printf("Testing MAC SHA-256 encoding...\n");
 
@@ -272,6 +337,15 @@ static void testHMAC_SHA256Encoding() {
 	EXPECT_TRUE(memcmp(output + AUTHENTICATED_DATA_SIZE, expetedMAC, HMAC_SHA256_SIZE) == 0);
 }
 
+/**
+ * @brief Main function to run all unit tests.
+ *
+ * This function serves as the entry point for the test suite. It runs all defined test functions and reports
+ * the total number of tests executed and the number of failures. The program exits with a success or failure
+ * status based on the test results.
+ *
+ * @return EXIT_SUCCESS if all tests pass, EXIT_FAILURE otherwise.
+ */
 int main(void) {
 	printf("SentinelGrig Agent Tests start\n\n");
 

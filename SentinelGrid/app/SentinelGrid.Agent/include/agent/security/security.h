@@ -1,4 +1,17 @@
 #pragma once
+
+/**
+ * @file security.h
+ * @brief This header file defines the interface for security-related functions, including HMAC SHA256 encryption.
+ *
+ * The functions in this header file provide functionality to calculate HMAC SHA256 encryption for securing data.
+ *
+ * @note The implementation of the security functions is expected to be provided in a corresponding source file (e.g., security.cpp).
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #ifndef SECURITY_H
 #define SECURITY_H
 

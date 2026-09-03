@@ -1,13 +1,36 @@
-﻿using SentinelGrid.ControlPlane.Domain;
-using System;
+﻿/**
+ * @file EngineMessageDecoder.cs
+ * @brief Contains the EngineMessageDecoder class for decoding engine messages in the SentinelGrid Control Plane protocol.
+ *
+ * The EngineMessageDecoder class provides methods for decoding engine messages received in the SentinelGrid Control Plane protocol.
+ * It validates the message structure, extracts relevant information, and returns the decoded result along with any potential errors.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
+using SentinelGrid.ControlPlane.Domain;
 using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SentinelGrid.ControlPlane.Protocol;
 
+/**
+ * @class EngineMessageDecoder
+ * @brief A static class that provides methods for decoding engine messages in the SentinelGrid Control Plane protocol.
+ *
+ * The EngineMessageDecoder class contains methods for decoding engine messages received in the SentinelGrid Control Plane protocol.
+ * It validates the message structure, extracts relevant information, and returns the decoded result along with any potential errors.
+ */
 public static class EngineMessageDecoder
 {
+    /**
+     * @brief Decodes an engine message from a byte span.
+     * @param packet The byte span containing the engine message to decode.
+     * @returns An EngineDecodeResult containing the decoded message and any potential errors.
+     *
+     * This method decodes an engine message from the provided byte span. It validates the message structure,
+     * extracts relevant information, and returns the decoded result along with any potential errors.
+     */
     public static EngineDecodeResult Decode(ReadOnlySpan<byte> packet)
     {
         if (packet.Length < EngineProtocolConstants.HeaderSize)
@@ -60,6 +83,14 @@ public static class EngineMessageDecoder
         };
     }
 
+    /**
+     * @brief Decodes a security event from a byte span.
+     * @param payload The byte span containing the security event payload to decode.
+     * @returns An EngineDecodeResult containing the decoded SecurityEvent and any potential errors.
+     *
+     * This method decodes a security event from the provided byte span. It validates the event structure,
+     * extracts relevant information, and returns the decoded result along with any potential errors.
+     */
     private static EngineDecodeResult DecodeEvent(ReadOnlySpan<byte> payload)
     {
         int offset = 0;
@@ -80,6 +111,14 @@ public static class EngineMessageDecoder
         return new EngineDecodeResult(new SecurityEvent(agentId, sequence, (EventTypes) eventType), EngineDecodeError.None);
     }
 
+    /**
+     * @brief Decodes a security alert from a byte span.
+     * @param payload The byte span containing the security alert payload to decode.
+     * @returns An EngineDecodeResult containing the decoded SecurityAlert and any potential errors.
+     *
+     * This method decodes a security alert from the provided byte span. It validates the alert structure,
+     * extracts relevant information, and returns the decoded result along with any potential errors.
+     */
     private static EngineDecodeResult DecodeAlert(ReadOnlySpan<byte> payload)
     {
         int offset = 0;

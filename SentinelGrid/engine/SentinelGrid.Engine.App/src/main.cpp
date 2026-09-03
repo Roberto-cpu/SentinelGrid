@@ -1,7 +1,13 @@
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
+/*
+ * @file main.cpp
+ * @brief This file contains the main entry point for the SentinelGrid Engine application.
+ *
+ * This application is responsible for managing agent sessions and handling security events.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
 
-#include <Windows.h>
 #include <cstdlib>
 #include <iostream>
 #include <array>
@@ -13,6 +19,7 @@
 #include <span>
 #include <type_traits>
 #include <vector>
+#include <string>
 
 #include <network/winsock_runtime.hpp>
 #include <network/tcp_server.hpp>
@@ -26,8 +33,21 @@
 #include <protocol/control_plane_encoder.hpp>
 #include <security/agent_key_registry.hpp>
 #include <security/replay_guard.hpp>
+#include <security/windows_credential_store.hpp>
+
+ /**
+  * @brief Structure representing the configuration for an agent's credentials.
+  */
+struct AgentCredentialConfiguration {
+	std::uint32_t keyId;
+	std::uint32_t agentId;
+	std::wstring  target;
+};
 
 int main() {
+
+	std::cout << "SentinelGrid Engine start.\n\n";
+
 	using namespace sentinelgrid::engine;
 
 	using network::WinsockRuntime;
@@ -36,46 +56,39 @@ int main() {
 	using network::TcpClient;
 	using EventQueue = concurrency::BoundedBlockingQueue<SecurityEvent>;
 
+	const std::array<AgentCredentialConfiguration, 2> agentCredentials{
+		AgentCredentialConfiguration{ 1U, 1U, L"SentinelGrid/Agent/1" },
+		AgentCredentialConfiguration{ 2U, 2U, L"SentinelGrid/Agent/2" }
+	};
+
+	const std::size_t agentCount = agentCredentials.size();
 
 	security::AgentKeyRegistry keyRegistry;
 	security::ReplayGuard replayGuard;
 
-	security::AgentKey agentOneKey{
-		0x00, 0x01, 0x02, 0x03,
-		0x04, 0x05, 0x06, 0x07,
-		0x08, 0x09, 0x0A, 0x0B,
-		0x0C, 0x0D, 0x0E, 0x0F,
-		0x10, 0x11, 0x12, 0x13,
-		0x14, 0x15, 0x16, 0x17,
-		0x18, 0x19, 0x1A, 0x1B,
-		0x1C, 0x1D, 0x1E, 0x1F
-	};
+	for (const auto& configuration : agentCredentials) {
+		security::AgentKey loadedKey{};
+		const auto loadResult = security::loadAgentKey(configuration.target, loadedKey);
 
-	security::AgentKey agentTwoKey{
-		0x00, 0x01, 0x02, 0x03,
-		0x04, 0x05, 0x06, 0x07,
-		0x08, 0x09, 0x0A, 0x0B,
-		0x0C, 0x0D, 0x0E, 0x0F,
-		0x10, 0x11, 0x12, 0x13,
-		0x14, 0x15, 0x16, 0x17,
-		0x18, 0x19, 0x1A, 0x1B,
-		0x1C, 0x1D, 0x1E, 0x1F
-	};
+		if (!loadResult.isSuccess()) {
+			security::secureErase(loadedKey);
 
-	if (!keyRegistry.registerKey(1U, 1U, agentOneKey)) {
-		std::cerr << "Unable to register agent key.\n";
-		return EXIT_FAILURE;
+			std::cerr << "Unable to load credential for agent " << configuration.agentId << ".\n"
+				<< "Status: " << static_cast<int>(loadResult.status)
+				<< ", WinErr: " << loadResult.nativeErrorCode << "\n";
+
+			return EXIT_FAILURE;
+		}
+
+		const bool registered = keyRegistry.registerKey(configuration.keyId, configuration.agentId, loadedKey);
+		security::secureErase(loadedKey);
+
+		if (!registered) {
+			std::cerr << "Duplicated key ID while configuring agent " << configuration.agentId << ".\n";
+
+			return EXIT_FAILURE;
+		}
 	}
-	
-	if (!keyRegistry.registerKey(1U, 2U, agentTwoKey)) {
-		std::cerr << "Unable to register agent key.\n";
-		return EXIT_FAILURE;
-	}
-
-	SecureZeroMemory(agentOneKey.data(), agentOneKey.size());
-	SecureZeroMemory(agentTwoKey.data(), agentTwoKey.size());
-
-	std::cout << "SentinelGrid Engine start.\n\n";
 
 	static_assert(!std::is_copy_constructible_v<UniqueSocket>);
 	static_assert(!std::is_copy_assignable_v<UniqueSocket>);
@@ -83,8 +96,6 @@ int main() {
 	static_assert(std::is_move_constructible_v<UniqueSocket>);
 	static_assert(std::is_move_assignable_v<UniqueSocket>);
 	
-	constexpr std::size_t AgentCount{ 2 };
-
 	WinsockRuntime winsock;
 
 	if (!winsock.isReady()) {
@@ -105,9 +116,9 @@ int main() {
 	std::cout << "SentinelGrid TCP server listening on: 127.0.0.1:5050.\n";
 	std::cout << "Waiting for Agent connection...\n";
 
-	TcpClient client;
+	TcpClient controlPlaneClient;
 
-	if (!client.connect("127.0.0.1", 6060U)) {
+	if (!controlPlaneClient.connect("127.0.0.1", 6060U)) {
 		std::cerr << "Unable to connect to the server on port 6060.\n";
 		return EXIT_FAILURE;
 	}
@@ -116,9 +127,9 @@ int main() {
 
 
 	std::atomic_bool publicationFailed{ false };
-	std::vector<app::SessionResult> sessionResults(AgentCount);
+	std::vector<app::SessionResult> sessionResults(agentCount);
 	std::vector<std::jthread> sessionWorkers;
-	sessionWorkers.reserve(AgentCount);
+	sessionWorkers.reserve(agentCount);
 
 	FailedLoginRule loginRule{ 3 };
 	EventQueue eventQueue{ 4 };
@@ -127,7 +138,7 @@ int main() {
 	std::size_t totalEvents{ 0 };
 
 	std::jthread processor{
-		[&eventQueue,&client, &loginRule, &processedEvents, &publicationFailed]() {
+		[&eventQueue,&controlPlaneClient, &loginRule, &processedEvents, &publicationFailed]() {
 
 			while (auto event = eventQueue.pop()) {
 
@@ -150,7 +161,7 @@ int main() {
 				}
 
 				const auto eventSendResult = network::sendAll(
-					client.socket(), 
+					controlPlaneClient.socket(),
 					std::span<const std::uint8_t>{
 						eventFrame.data(), 
 						eventEncodeResult.byte_written
@@ -164,6 +175,11 @@ int main() {
 					publicationFailed = true;
 					eventQueue.close();
 					break;
+				}
+
+				if (publicationFailed.load()) {
+					std::cerr << "Control-Plane publication failed.\n";
+					return EXIT_FAILURE;
 				}
 
 				const auto loginAlert = loginRule.evaluate(*event);
@@ -186,7 +202,7 @@ int main() {
 					}
 
 					const auto alertSedResult = network::sendAll(
-						client.socket(),
+						controlPlaneClient.socket(),
 						std::span<const std::uint8_t> {
 							alertFrame.data(),
 							alertEncodeResult.byte_written
@@ -209,10 +225,10 @@ int main() {
 		}
 	};
 
-	for (std::size_t i = 0; i < AgentCount; ++i) {
-		auto client = server.acceptClient();
+	for (std::size_t i = 0; i < agentCount; ++i) {
+		auto agentSocket = server.acceptClient();
 		
-		if (!client.isValid()) {
+		if (!agentSocket.isValid()) {
 			std::cerr << "Unable to accept Agent \"" << (i + 1) << "\" connection.\n";
 			break;
 		}
@@ -220,8 +236,8 @@ int main() {
 		std::cout << "Opened session for agent \"" << (i + 1) << "\".\n";
 
 		sessionWorkers.emplace_back(
-			[client = std::move(client), &eventQueue, &sessionResults, i, &keyRegistry, &replayGuard]() mutable {
-					sessionResults[i] = app::runSessionAgent(std::move(client), eventQueue, keyRegistry, replayGuard);
+			[agentSocket = std::move(agentSocket), &eventQueue, &sessionResults, i, &keyRegistry, &replayGuard]() mutable {
+					sessionResults[i] = app::runSessionAgent(std::move(agentSocket), eventQueue, keyRegistry, replayGuard);
 				}
 			);
 	}

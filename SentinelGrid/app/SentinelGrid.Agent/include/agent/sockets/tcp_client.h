@@ -1,3 +1,16 @@
+#pragma once
+
+/*
+ * @file tcp_client.h
+ * @brief Header file for TCP client socket operations.
+ *
+ * This header file defines the structure and function prototypes for managing a TCP client connection,
+ * including initialization, connection, data transmission, and closure of the socket.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #ifndef TCP_CLIENT_H
 #define TCP_CLIENT_H
 

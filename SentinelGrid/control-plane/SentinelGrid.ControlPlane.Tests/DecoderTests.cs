@@ -1,16 +1,48 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿/**
+ * @file DecoderTests.cs
+ * @brief Contains unit tests for the EngineMessageDecoder and related classes.
+ *
+ * This file includes a series of unit tests that validate the functionality of the EngineMessageDecoder, 
+ * EngineFrameReader, and InMemorySecurityTelemetryRepository classes. 
+ * The tests cover various scenarios, including valid and invalid message decoding, reading from streams, and repository operations.
+ * 
+ * @note These tests are part of the SentinelGrid Control Plane Tests project.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
+using Microsoft.Extensions.Configuration;
 using Npgsql;
 using SentinelGrid.ControlPlane.Domain;
 using SentinelGrid.ControlPlane.Infrastructure.Persistence;
 using SentinelGrid.ControlPlane.Protocol;
-using System.Net.Sockets;
 
 namespace SentinelGrid.ControlPane.Tests;
 
+/**
+ * @class DecoderTests
+ * @brief A collection of unit tests for the EngineMessageDecoder and related classes.
+ *
+ * The DecoderTests class contains unit tests that validate the functionality of the EngineMessageDecoder, 
+ * EngineFrameReader, and InMemorySecurityTelemetryRepository classes. 
+ * The tests cover various scenarios, including valid and invalid message decoding, reading from streams, and repository operations.
+ */
 [TestClass]
 public sealed class DecoderTests
 {
+    /**
+     * @brief Creates a new instance of SecurityEvent for testing purposes.
+     * @param agent The agent ID to be used in the SecurityEvent.
+     * @returns A new instance of SecurityEvent with the specified agent ID.
+     */
     private static SecurityEvent CreateSecurityEventInstance(uint agent) { return new SecurityEvent(agent, ulong.MaxValue, EventTypes.LoginFailed); }
+
+    /**
+     * @brief Creates a new instance of SecurityAlert for testing purposes.
+     * @param agent The agent ID to be used in the SecurityAlert.
+     * @returns A new instance of SecurityAlert with the specified agent ID.
+     */
     private static SecurityAlert CreateSecurityAlertInstance(uint agent) { 
         return new SecurityAlert(
             AlertTypes.RepeatedLoginFailures,
@@ -19,7 +51,11 @@ public sealed class DecoderTests
             3
         ); 
     }
-
+    
+    /**
+     * @brief Creates a new instance of a valid event packet for testing purposes.
+     * @returns A byte array representing the valid event packet.
+     */
     private static byte[] CreateValidEventPacket() =>
     [
         0x53, 0x47, 0x52, 0x44, // SGRD
@@ -35,6 +71,10 @@ public sealed class DecoderTests
         0x00, 0x00, 0x00, 0x03  // LoginFailed
     ];
 
+    /**
+     * @brief Creates a new instance of a valid alert packet for testing purposes.
+     * @returns A byte array representing the valid alert packet.
+     */
     private static byte[] CreateValidAlertPacket() =>
     [
         0x53, 0x47, 0x52, 0x44, // SGRD
@@ -51,7 +91,10 @@ public sealed class DecoderTests
 
         0x00, 0x00, 0x00, 0x03  // Failure count 3
     ];
-
+    
+    /**
+     * @brief Tests the decoding of a valid event packet.
+     */
     [TestMethod]
     public void TestValidEvent()
     {
@@ -62,6 +105,9 @@ public sealed class DecoderTests
         Assert.IsInstanceOfType<SecurityEvent>(result.Message);
     }
 
+    /**
+     * @brief Tests the decoding of a valid alert packet.
+     */
     [TestMethod]
     public void TestValidAlert()
     {
@@ -72,6 +118,9 @@ public sealed class DecoderTests
         Assert.IsInstanceOfType<SecurityAlert>(result.Message);
     }
 
+    /**
+     * @brief Tests the decoding of packets that are too small.
+     */
     [TestMethod]
     public void TestPacketTooSmall()
     {
@@ -85,6 +134,9 @@ public sealed class DecoderTests
         }
     }
 
+    /**
+     * @brief Tests the decoding of a packet with an invalid magic number.
+     */
     [TestMethod]
     public void TestInvalidMagic()
     {
@@ -96,6 +148,9 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineDecodeError.InvalidMagic, result.Error);
     }
 
+    /**
+     * @brief Tests the decoding of a packet with an unsupported version.
+     */
     [TestMethod]
     public void TestUnsupportedVersion()
     {
@@ -106,7 +161,10 @@ public sealed class DecoderTests
         Assert.IsFalse(result.IsSuccess);
         Assert.AreEqual(EngineDecodeError.UnsupportedVersion, result.Error);
     }
-
+    
+    /**
+     * @brief Tests the decoding of a packet with an invalid message type.
+     */
     [TestMethod]
     public void TestInvalidMessageType()
     {
@@ -118,6 +176,9 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineDecodeError.InvalidMessageType, result.Error);
     }
 
+    /**
+     * @brief Tests the decoding of a packet with an invalid payload length for an event.
+     */
     [TestMethod]
     public void TestInvalidEventPayloadLength()
     {
@@ -129,6 +190,9 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineDecodeError.InvalidPayloadLength, result.Error);
     }
 
+    /**
+     * @brief Tests the decoding of a packet with an invalid payload length for an alert.
+     */
     [TestMethod]
     public void TestInvalidAlertPayloadLength()
     {
@@ -140,6 +204,9 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineDecodeError.InvalidPayloadLength, result.Error);
     }
 
+    /**
+     * @brief Tests the decoding of packets with invalid sizes.
+     */
     [TestMethod]
     public void TestInvalidPacketSize()
     {
@@ -154,6 +221,9 @@ public sealed class DecoderTests
         }
     }
 
+    /**
+     * @brief Tests the decoding of a packet with an invalid agent ID.
+     */
     [TestMethod]
     public void TestInvalidAgentId()
     {
@@ -165,6 +235,9 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineDecodeError.InvalidAgentId, result.Error);
     }
 
+    /**
+     * @brief Tests the decoding of a packet with an invalid sequence number.
+     */
     [TestMethod]
     public void TestInvalidSequenceNumber()
     {
@@ -176,6 +249,9 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineDecodeError.InvalidSequenceNumber, result.Error);
     }
 
+    /**
+     * @brief Tests the decoding of a packet with an invalid event type.
+     */
     [TestMethod]
     public void TestInvalidEventType()
     {
@@ -187,6 +263,9 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineDecodeError.InvalidEventType, result.Error);
     }
 
+    /**
+     * @brief Tests the decoding of a packet with an invalid alert type.
+     */
     [TestMethod]
     public void TestInvalidAlertType()
     {
@@ -198,6 +277,9 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineDecodeError.InvalidAlertType, result.Error);
     }
 
+    /**
+     * @brief Tests the decoding of a packet with an invalid severity.
+     */
     [TestMethod]
     public void TestInvalidSeverity()
     {
@@ -209,6 +291,9 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineDecodeError.InvalidSeverity, result.Error);
     }
 
+    /**
+     * @brief Tests the decoding of a packet with an invalid failures count.
+     */
     [TestMethod]
     public void TestInvalidFailuresCount()
     {
@@ -220,6 +305,9 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineDecodeError.InvalidFailureCount, result.Error);
     }
 
+    /**
+     * @brief Tests the reading of a valid event from a stream.
+     */
     [TestMethod]
     public async Task TestReadValidEvent()
     {
@@ -230,6 +318,9 @@ public sealed class DecoderTests
         Assert.IsInstanceOfType<SecurityEvent>(result.Message);
     }
 
+    /**
+     * @brief Tests the reading of a valid alert from a stream.
+     */
     [TestMethod]
     public async Task TestReadValidAlert()
     {
@@ -240,6 +331,9 @@ public sealed class DecoderTests
         Assert.IsInstanceOfType<SecurityAlert>(result.Message);
     }
 
+    /**
+     * @brief Tests the reading of a stream that has been closed by the peer.
+     */
     [TestMethod]
     public async Task TestReadPeerClosed()
     {
@@ -249,7 +343,10 @@ public sealed class DecoderTests
         Assert.IsFalse(result.IsSuccess);
         Assert.AreEqual(EngineFrameReadStatus.PeerClosed, result.Status);
     }
-
+    
+    /**
+     * @brief Tests the reading of a truncated header from a stream.
+     */
     [TestMethod]
     public async Task TestReadTruncatedHeader()
     {
@@ -270,6 +367,9 @@ public sealed class DecoderTests
         }
     }
 
+    /**
+     * @brief Tests the reading of a truncated payload from a stream.
+     */
     [TestMethod]
     public async Task TestTruncatedPayload()
     {
@@ -284,6 +384,9 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineFrameReadStatus.TruncatedPayload, result.Status);
     }
 
+    /**
+     * @brief Tests the reading of a stream with an invalid frame.
+     */
     [TestMethod]
     public async Task TestInvalidFrame()
     {
@@ -301,8 +404,11 @@ public sealed class DecoderTests
         Assert.AreEqual(EngineDecodeError.InvalidMagic, result.DecodeError);
     }
 
+    /**
+     * @brief Tests the reading of a stream with a cancelled token.
+     */
     [TestMethod]
-    public async Task TestCanecelledToken()
+    public async Task TestCancelledToken()
     {
         await using var stream = new MemoryStream(CreateValidEventPacket());
         CancellationTokenSource cts = new CancellationTokenSource();
@@ -322,6 +428,9 @@ public sealed class DecoderTests
         Assert.IsNotNull(capturedException);
     }
 
+    /**
+     * @brief Tests the addition of a SecurityEvent to the InMemorySecurityTelemetryRepository.
+     */
     [TestMethod]
     public async Task TestRepositoryAddEvent()
     {
@@ -332,7 +441,10 @@ public sealed class DecoderTests
         await repository.StoreEventAsync(securityEvent, cancellationTokenSource.Token);
         Assert.IsNotEmpty(repository.GetEventsSnapshot());
     }
-    
+
+    /**
+     * @brief Tests the addition of a SecurityAlert to the InMemorySecurityTelemetryRepository.
+     */
     [TestMethod]
     public async Task TestRepositoryAddAlert()
     {
@@ -344,6 +456,9 @@ public sealed class DecoderTests
         Assert.IsNotEmpty(repository.GetAlertsSnapshot());
     }
 
+    /**
+     * @brief Tests the FIFO behavior of the InMemorySecurityTelemetryRepository for SecurityEvents.
+     */
     [TestMethod]
     public async Task TestRepositoryCheckEventsFIFO()
     {
@@ -359,6 +474,9 @@ public sealed class DecoderTests
         Assert.AreEqual(102U, repository.GetEventsSnapshot()[1].AgentId);
     }
 
+    /**
+     * @brief Tests the FIFO behavior of the InMemorySecurityTelemetryRepository for SecurityAlerts.
+     */
     [TestMethod]
     public async Task TestRepositoryAddAlertWithCancelledToken()
     {
@@ -381,6 +499,9 @@ public sealed class DecoderTests
         Assert.IsTrue(exceptionCaptured);
     }
 
+    /**
+     * @brief Tests the addition of a null SecurityEvent to the InMemorySecurityTelemetryRepository.
+     */
     [TestMethod]
     public async Task TestRepositoryAddNullAlert()
     {
@@ -402,9 +523,15 @@ public sealed class DecoderTests
         Assert.IsTrue(exceptionCaptured);
     }
 
+    /**
+     * @brief Tests the addition of a null SecurityAlert to the InMemorySecurityTelemetryRepository.
+     */
     [TestClass]
     public sealed class PostgreSqlConnectionTests {
 
+        /**
+         * @brief Tests the storage of a SecurityEvent in the PostgreSQL repository.
+         */
         [TestMethod]
         public async Task StoreEvent()
         {
@@ -432,6 +559,9 @@ public sealed class DecoderTests
             Assert.IsGreaterThan(0, (long)result);
         }
 
+        /**
+         * @brief Tests the storage of a SecurityEvent in the PostgreSQL repository twice.
+         */
         [TestMethod]
         public async Task StoreEventTwoTimes()
         {
@@ -460,6 +590,9 @@ public sealed class DecoderTests
             Assert.AreEqual(4, (long)result);
         }
 
+        /**
+         * @brief Tests the storage of a SecurityEvent with the maximum uint value in the PostgreSQL repository.
+         */
         [TestMethod]
         public async Task StoreEventMaxInt()
         {
@@ -486,7 +619,10 @@ public sealed class DecoderTests
 
             Assert.AreEqual(4, (long)result);
         }
-        
+
+        /**
+         * @brief Tests the behavior of the PostgreSQL repository when a cancellation token is triggered.
+         */
         [TestMethod]
         public async Task TokenException()
         {

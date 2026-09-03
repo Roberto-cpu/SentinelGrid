@@ -7,15 +7,16 @@
   <Project Path="app/SentinelGrid.Agent.App/SentinelGrid.Agent.App.vcxproj" Id="902e29ad-a9eb-45ee-8ba7-f71b210f82b8" />
   <Project Path="app/SentinelGrid.Agent.Tests/SentinelGrid.Agent.Tests.vcxproj" Id="f3d9e176-df01-4fa1-bf3d-5e4771a82e12" />
   <Project Path="app/SentinelGrid.Agent/SentinelGrid.Agent.vcxproj" Id="ccbf1dfb-9931-4096-ac7f-8a6a8a614290" />
-  <Project Path="control-plane/SentinelGrid.ControlPlane.Application/SentinelGrid.ControlPlane.Application.csproj" Id="e17c35a9-e555-4b05-85c5-0fb081b73e80" />
+  <Project Path="control-plane/SentinelGrid.ControlPlane.Application/SentinelGrid.ControlPlane.Application.csproj" />
   <Project Path="control-plane/SentinelGrid.ControlPlane.Domain/SentinelGrid.ControlPlane.Domain.csproj" />
-  <Project Path="control-plane/SentinelGrid.ControlPlane.Infrastructure/SentinelGrid.ControlPlane.Infrastructure.csproj" Id="a0199bba-ce81-4d4e-a990-a7f19e523067" />
+  <Project Path="control-plane/SentinelGrid.ControlPlane.Infrastructure/SentinelGrid.ControlPlane.Infrastructure.csproj" />
   <Project Path="control-plane/SentinelGrid.ControlPlane.Protocol/SentinelGrid.ControlPlane.Protocol.csproj" />
   <Project Path="control-plane/SentinelGrid.ControlPlane.Tests/SentinelGrid.ControlPlane.Tests.csproj" />
-  <Project Path="control-plane/SentinelGrid.ControlPlane.Worker/SentinelGrid.ControlPlane.Worker.csproj" Id="325ce32f-0488-451c-8b67-d7cec0914914" />
+  <Project Path="control-plane/SentinelGrid.ControlPlane.Worker/SentinelGrid.ControlPlane.Worker.csproj" />
   <Project Path="engine/SentinelGrid.Engine.App/SentinelGrid.Engine.App.vcxproj" Id="c510f007-c31c-4ebb-a14c-db1206943a01" />
   <Project Path="engine/SentinelGrid.Engine.Network.Windows/SentinelGrid.Engine.Network.Windows.vcxproj" Id="087c4021-20ce-4877-989a-1b58d2e6c548" />
   <Project Path="engine/SentinelGrid.Engine.Security.Windows/SentinelGrid.Engine.Security.Windows.vcxproj" Id="c3d0e935-33f7-466f-8c5d-6139573a4f26" />
   <Project Path="engine/SentinelGrid.Engine.Tests/SentinelGrid.Engine.Tests.vcxproj" Id="97257fbe-66fc-4ab7-b5a7-75f8d946c2a9" />
   <Project Path="engine/SentinelGrid.Engine/SentinelGrid.Engine.vcxproj" Id="a50c97ce-0867-4404-997b-8df5f1826559" />
+  <Project Path="provisioner/SentinelGrid.Agentkey.Provisioner/SentinelGrid.Agentkey.Provisioner.vcxproj" Id="d9db9389-bd2d-4a9f-b9e8-1dfe10944206" />
 </Solution>

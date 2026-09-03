@@ -1,3 +1,14 @@
+/**
+ * @file unique_socket.cpp
+ * @brief Implementation of the UniqueSocket class for managing socket resources.
+ * 
+ * This file contains the implementation of the UniqueSocket class, 
+ * which is responsible for managing the lifetime of a socket resource in a RAII manner.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <WinSock2.h>
 #include <utility>
 #include <network/unique_socket.hpp>

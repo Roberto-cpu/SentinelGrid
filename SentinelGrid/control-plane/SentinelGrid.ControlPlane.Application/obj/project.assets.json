@@ -33,11 +33,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Application\\SentinelGrid.ControlPlane.Application.csproj",
+      "projectUniqueName": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Application\\SentinelGrid.ControlPlane.Application.csproj",
       "projectName": "SentinelGrid.ControlPlane.Application",
-      "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Application\\SentinelGrid.ControlPlane.Application.csproj",
+      "projectPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Application\\SentinelGrid.ControlPlane.Application.csproj",
       "packagesPath": "C:\\Users\\rober\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Application\\obj\\",
+      "outputPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Application\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -59,8 +59,8 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj": {
-              "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj"
+            "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj": {
+              "projectPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj"
             }
           }
         }

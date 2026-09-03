@@ -1,3 +1,13 @@
+/**
+ * @file socket_io.cpp
+ * @brief Implementation of socket I/O functions for Windows platform.
+ * 
+ * This file contains the implementation of socket I/O functions, including receiving and sending data over sockets in a Windows environment.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <cstdint>	
 #include <climits>
 #include <WinSock2.h>

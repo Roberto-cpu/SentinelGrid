@@ -1,3 +1,15 @@
+/*
+ * @file agent_key_registry.cpp
+ * @brief Implementation of the AgentKeyRegistry class for managing agent credentials in a secure manner.
+ * 
+ * This file contains the implementation of the AgentKeyRegistry class, which is responsible for securely storing and managing agent credentials, 
+ * including agent IDs and their associated keys. 
+ * The class provides methods for registering new keys and retrieving existing credentials based on key IDs.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <Windows.h>

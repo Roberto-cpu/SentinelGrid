@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "sVbnWXY56gk=",
+  "dgSpecHash": "2jAacLJeaoM=",
   "success": true,
-  "projectFilePath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Tests\\SentinelGrid.ControlPlane.Tests.csproj",
+  "projectFilePath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Tests\\SentinelGrid.ControlPlane.Tests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\rober\\.nuget\\packages\\microsoft.applicationinsights\\2.23.0\\microsoft.applicationinsights.2.23.0.nupkg.sha512",
     "C:\\Users\\rober\\.nuget\\packages\\microsoft.codecoverage\\18.0.1\\microsoft.codecoverage.18.0.1.nupkg.sha512",

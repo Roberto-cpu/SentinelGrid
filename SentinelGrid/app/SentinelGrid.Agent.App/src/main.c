@@ -1,8 +1,11 @@
-/*
- * @author: Roberto Garzone
- * @date: 08 aug 2026
+/**
+ * @file main.c
+ * @brief Main entry point for the SentinelGrid Agent application.
  *
- * @description: This code defines the security events management logic to monitor the agent functioning.
+ * This file contains the main function that initializes the agent, connects to the engine, and sends security event packets.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
  */
 
 #include <stdio.h>

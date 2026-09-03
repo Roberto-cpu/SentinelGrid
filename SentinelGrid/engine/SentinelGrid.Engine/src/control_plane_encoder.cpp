@@ -1,3 +1,13 @@
+/**
+ * @file control_plane_encoder.cpp
+ * @brief This file contains the implementation of functions for encoding control plane messages.
+ * 
+ * This file provides functions to encode security events and alerts into a specific binary format for transmission over the control plane.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <set>
 
 #include <protocol/control_plane_encoder.hpp>
@@ -5,11 +15,23 @@
 
 namespace sentinelgrid::engine::protocol {
 
+	/**
+	 * @brief Writes a 16-bit unsigned integer to the output span in big-endian format.
+	 * @param output The output span where the value will be written.
+	 * @param offset The offset in the output span where the value will be written.
+	 * @param value The 16-bit unsigned integer value to write.
+	 */
 	void writeUint16BigEndian(std::span<std::uint8_t>output, std::size_t offset, std::uint16_t value) {
 		output[offset]     = static_cast<std::uint8_t>((value >> 8) & 0xFF);
 		output[offset + 1] = static_cast<std::uint8_t>(value & 0xFF);
 	}
 
+	/**
+	 * @brief Writes a 32-bit unsigned integer to the output span in big-endian format.
+	 * @param output The output span where the value will be written.
+	 * @param offset The offset in the output span where the value will be written.
+	 * @param value The 32-bit unsigned integer value to write.
+	 */
 	void writeUint32BigEndian(std::span<uint8_t>output, std::size_t offset, std::uint32_t value) {
 		output[offset]     = static_cast<std::uint8_t>((value >> 24) & 0xFF);
 		output[offset + 1] = static_cast<std::uint8_t>((value >> 16) & 0xFF);
@@ -17,6 +39,12 @@ namespace sentinelgrid::engine::protocol {
 		output[offset + 3] = static_cast<std::uint8_t>(value & 0xFF);
 	}
 
+	/**
+	 * @brief Writes a 64-bit unsigned integer to the output span in big-endian format.
+	 * @param output The output span where the value will be written.
+	 * @param offset The offset in the output span where the value will be written.
+	 * @param value The 64-bit unsigned integer value to write.
+	 */
 	void writeUint64BigEndian(std::span<uint8_t>output, std::size_t offset, std::uint64_t value) {
 		output[offset]	   = static_cast<std::uint8_t>((value >> 56) & 0xFF);
 		output[offset + 1] = static_cast<std::uint8_t>((value >> 48) & 0xFF);

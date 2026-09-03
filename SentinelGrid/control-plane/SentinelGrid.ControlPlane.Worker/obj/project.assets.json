@@ -1635,11 +1635,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Worker\\SentinelGrid.ControlPlane.Worker.csproj",
+      "projectUniqueName": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Worker\\SentinelGrid.ControlPlane.Worker.csproj",
       "projectName": "SentinelGrid.ControlPlane.Worker",
-      "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Worker\\SentinelGrid.ControlPlane.Worker.csproj",
+      "projectPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Worker\\SentinelGrid.ControlPlane.Worker.csproj",
       "packagesPath": "C:\\Users\\rober\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Worker\\obj\\",
+      "outputPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Worker\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -1661,17 +1661,17 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Application\\SentinelGrid.ControlPlane.Application.csproj": {
-              "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Application\\SentinelGrid.ControlPlane.Application.csproj"
+            "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Application\\SentinelGrid.ControlPlane.Application.csproj": {
+              "projectPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Application\\SentinelGrid.ControlPlane.Application.csproj"
             },
-            "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj": {
-              "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj"
+            "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj": {
+              "projectPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj"
             },
-            "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Infrastructure\\SentinelGrid.ControlPlane.Infrastructure.csproj": {
-              "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Infrastructure\\SentinelGrid.ControlPlane.Infrastructure.csproj"
+            "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Infrastructure\\SentinelGrid.ControlPlane.Infrastructure.csproj": {
+              "projectPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Infrastructure\\SentinelGrid.ControlPlane.Infrastructure.csproj"
             },
-            "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Protocol\\SentinelGrid.ControlPlane.Protocol.csproj": {
-              "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Protocol\\SentinelGrid.ControlPlane.Protocol.csproj"
+            "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Protocol\\SentinelGrid.ControlPlane.Protocol.csproj": {
+              "projectPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Protocol\\SentinelGrid.ControlPlane.Protocol.csproj"
             }
           }
         }

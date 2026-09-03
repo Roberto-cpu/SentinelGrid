@@ -1,4 +1,18 @@
 #pragma once
+
+/**
+ * @file buffer_codec.h
+ * @brief This header file defines the interface for managing a circular buffer of security events.
+ *
+ * The functions in this header file provide functionality to initialize, add, remove, and manage a circular buffer
+ * that holds security events. It also includes functions to print the buffer contents and deallocate its resources.
+ *
+ * @note The implementation of the buffer management functions is expected to be provided in a corresponding source file (e.g., buffer_codec.cpp).
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #ifndef BUFFER_CODEC_H
 #define BUFFER_CODEC_H
 

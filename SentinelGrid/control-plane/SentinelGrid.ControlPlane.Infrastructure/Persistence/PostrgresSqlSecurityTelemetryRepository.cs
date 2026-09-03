@@ -1,25 +1,52 @@
-﻿using Microsoft.Extensions.Logging;
+﻿/**
+ * @file PostrgresSqlSecurityTelemetryRepository.cs
+ * @brief Implements the ISecurityTelemetryRepository interface for PostgreSQL.
+ *
+ * This file contains the implementation of the ISecurityTelemetryRepository interface for storing security events and alerts in a PostgreSQL database.
+ * It provides methods to store individual security events and alerts, as well as a method to store analysis results that include both events and alerts.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 using Npgsql;
 using SentinelGrid.ControlPlane.Application.Persistence;
 using SentinelGrid.ControlPlane.Domain;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace SentinelGrid.ControlPlane.Infrastructure.Persistence;
 
+/**
+ * @class PostrgresSqlSecurityTelemetryRepository
+ * @brief Implements the ISecurityTelemetryRepository interface for PostgreSQL.
+ *
+ * The PostrgresSqlSecurityTelemetryRepository class provides an implementation of the ISecurityTelemetryRepository interface for storing security events and alerts in a PostgreSQL database.
+ * It includes methods to store individual security events and alerts, as well as a method to store analysis results that include both events and alerts.
+ */
 public sealed class PostrgresSqlSecurityTelemetryRepository : ISecurityTelemetryRepository
 {
     private readonly NpgsqlDataSource _dataSource;
 
+    /**
+     * @brief Constructs a new PostrgresSqlSecurityTelemetryRepository.
+     * @param dataSource The NpgsqlDataSource used for database connections.
+     *
+     * This constructor initializes a new instance of the PostrgresSqlSecurityTelemetryRepository class with the provided NpgsqlDataSource for database connections.
+     */
     public PostrgresSqlSecurityTelemetryRepository(NpgsqlDataSource dataSource)
     {
         ArgumentNullException.ThrowIfNull(dataSource);
         _dataSource = dataSource;
     }
 
+    /**
+     * @brief Stores a security event in the PostgreSQL database.
+     * @param securityEvent The security event to be stored.
+     * @param cancellationToken A token that can be used to cancel the operation.
+     *
+     * This method inserts the provided security event into the security_events table in the PostgreSQL database.
+     * If a conflict occurs (i.e., an event with the same agent_id and sequence_number already exists), the insertion is ignored.
+     */
     public async Task StoreEventAsync(SecurityEvent securityEvent, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(securityEvent);
@@ -39,6 +66,14 @@ public sealed class PostrgresSqlSecurityTelemetryRepository : ISecurityTelemetry
         await cmd.ExecuteNonQueryAsync(cancellationToken);
     }
 
+    /**
+     * @brief Stores a security alert in the PostgreSQL database.
+     * @param securityAlert The security alert to be stored.
+     * @param cancellationToken A token that can be used to cancel the operation.
+     *
+     * This method inserts the provided security alert into the security_alerts table in the PostgreSQL database.
+     * If a conflict occurs (i.e., an alert with the same alert_type, agent_id, and triggering_sequence already exists), the insertion is ignored.
+     */
     public async Task StoreAlertAsync(SecurityAlert securityAlert, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(securityAlert);
@@ -61,6 +96,15 @@ public sealed class PostrgresSqlSecurityTelemetryRepository : ISecurityTelemetry
 
     }
 
+    /**
+     * @brief Stores a security event and its associated alerts in the PostgreSQL database.
+     * @param securityEvent The security event to be stored.
+     * @param alerts The collection of security alerts associated with the event.
+     * @param cancellationToken A token that can be used to cancel the operation.
+     *
+     * This method inserts the provided security event and its associated alerts into the PostgreSQL database within a single transaction.
+     * If a conflict occurs for either the event or any of the alerts, the insertion is ignored for that specific record.
+     */
     public async Task StoreAnalysisResultAsync(
         SecurityEvent securityEvent, IReadOnlyCollection<SecurityAlert> alerts, 
         CancellationToken cancellationToken)

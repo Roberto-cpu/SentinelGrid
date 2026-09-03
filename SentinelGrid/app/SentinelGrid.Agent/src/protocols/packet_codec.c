@@ -1,3 +1,13 @@
+/**
+ * @file packet_codec.c
+ * @brief Implementation of packet encoding and decoding for the SentinelGrid Agent.
+ *
+ * This file contains the implementation of functions to encode and decode security event packets, including authenticated packets with HMAC SHA-256.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include "../../include/agent/protocols/packet_codec.h"
 #include <security/security.h>
 

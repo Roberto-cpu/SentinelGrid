@@ -1,3 +1,14 @@
+/**
+ * @file packet_codec.h
+ * @brief Header file for packet encoding and decoding functions.
+ *
+ * This file contains the declarations for functions that encode and decode security event packets
+ * for transmission over TCP, including support for authenticated packets using HMAC SHA-256.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #ifndef PACKET_CODEC_H
 #define PACKET_CODEC_H
 

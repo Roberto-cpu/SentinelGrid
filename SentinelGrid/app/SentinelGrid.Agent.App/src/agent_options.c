@@ -1,3 +1,14 @@
+/**
+ * @file agent_options.c
+ * @brief Implementation of agent options parsing.
+ *
+ * This file contains the implementation of the function to parse command-line arguments for the agent application.
+ * It validates the input and extracts the agent ID from the provided arguments.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>

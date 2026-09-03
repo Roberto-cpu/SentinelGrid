@@ -1,3 +1,14 @@
+/*
+ * @file tcp_server.cpp
+ * @brief Implementation of the TcpServer class for managing TCP server operations.
+ * 
+ * This file contains the implementation of the TcpServer class, 
+ * which is responsible for managing TCP server operations, including starting the server, accepting client connections, and stopping the server.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <utility>
 #include <WinSock2.h>
 #include <WS2tcpip.h>

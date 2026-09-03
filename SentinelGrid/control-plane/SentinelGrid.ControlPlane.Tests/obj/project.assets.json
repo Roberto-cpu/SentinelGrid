@@ -2889,11 +2889,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Tests\\SentinelGrid.ControlPlane.Tests.csproj",
+      "projectUniqueName": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Tests\\SentinelGrid.ControlPlane.Tests.csproj",
       "projectName": "SentinelGrid.ControlPlane.Tests",
-      "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Tests\\SentinelGrid.ControlPlane.Tests.csproj",
+      "projectPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Tests\\SentinelGrid.ControlPlane.Tests.csproj",
       "packagesPath": "C:\\Users\\rober\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Tests\\obj\\",
+      "outputPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Tests\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -2915,14 +2915,14 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj": {
-              "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj"
+            "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj": {
+              "projectPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Domain\\SentinelGrid.ControlPlane.Domain.csproj"
             },
-            "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Infrastructure\\SentinelGrid.ControlPlane.Infrastructure.csproj": {
-              "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Infrastructure\\SentinelGrid.ControlPlane.Infrastructure.csproj"
+            "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Infrastructure\\SentinelGrid.ControlPlane.Infrastructure.csproj": {
+              "projectPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Infrastructure\\SentinelGrid.ControlPlane.Infrastructure.csproj"
             },
-            "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Protocol\\SentinelGrid.ControlPlane.Protocol.csproj": {
-              "projectPath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Protocol\\SentinelGrid.ControlPlane.Protocol.csproj"
+            "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Protocol\\SentinelGrid.ControlPlane.Protocol.csproj": {
+              "projectPath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Protocol\\SentinelGrid.ControlPlane.Protocol.csproj"
             }
           }
         }

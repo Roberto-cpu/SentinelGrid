@@ -1,3 +1,13 @@
+/**
+ * @file event_codec.c
+ * @brief Implementation of event serialization and deserialization for the SentinelGrid Agent.
+ *
+ * This file contains the implementation of functions to serialize and deserialize security events, as well as utility functions for printing events and byte arrays.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include "../../include/agent/codecs/event_codec.h"
 
 #include <stdio.h>

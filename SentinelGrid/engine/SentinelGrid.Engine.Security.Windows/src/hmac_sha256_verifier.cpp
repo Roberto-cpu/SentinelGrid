@@ -1,3 +1,13 @@
+/**
+ * @file hmac_sha256_verifier.cpp
+ * @brief This file contains the implementation for verifying HMAC-SHA256 signatures.
+ *
+ * This implementation provides functions to compute and verify HMAC-SHA256 signatures using the Windows Cryptography API: Next Generation (CNG).
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 

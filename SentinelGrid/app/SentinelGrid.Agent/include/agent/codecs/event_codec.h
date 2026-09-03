@@ -1,4 +1,18 @@
 #pragma once
+
+/**
+ * @file event_codec.h
+ * @brief This header file defines functions for encoding and decoding security events.
+ *
+ * The functions in this header file provide functionality to serialize and deserialize security events,
+ * as well as to print event data and byte arrays for debugging purposes.
+ *
+ * @note The implementation of the encoding and decoding functions is expected to be provided in a corresponding source file (e.g., event_codec.cpp).
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #ifndef EVENT_CODEC_H
 #define EVENT_CODEC_H
 

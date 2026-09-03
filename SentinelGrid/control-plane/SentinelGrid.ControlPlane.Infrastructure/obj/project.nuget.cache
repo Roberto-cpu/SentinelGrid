@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/DlNAdPyVwU=",
+  "dgSpecHash": "mWg4HGyhs2Y=",
   "success": true,
-  "projectFilePath": "C:\\Users\\rober\\OneDrive\\Documenti\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Infrastructure\\SentinelGrid.ControlPlane.Infrastructure.csproj",
+  "projectFilePath": "C:\\Dev\\SentinelGrid\\SentinelGrid\\control-plane\\SentinelGrid.ControlPlane.Infrastructure\\SentinelGrid.ControlPlane.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\rober\\.nuget\\packages\\microsoft.extensions.configuration\\6.0.0\\microsoft.extensions.configuration.6.0.0.nupkg.sha512",
     "C:\\Users\\rober\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\6.0.0\\microsoft.extensions.configuration.abstractions.6.0.0.nupkg.sha512",

@@ -1,3 +1,15 @@
+/**
+ * @file buffer_codec.c
+ * @brief Implementation of the circular buffer for security events.
+ *
+ * This file contains the implementation of a circular buffer to store security events in a fixed-size array.
+ * It provides functions to initialize the buffer, add events, remove the oldest event, print the buffer contents,
+ * and destroy the buffer.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include "../../include/agent/codecs/buffer_codec.h"
 #include "../../include/agent/codecs/event_codec.h"
 

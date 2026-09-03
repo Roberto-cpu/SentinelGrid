@@ -1,3 +1,14 @@
+/**
+ * @file failed_login_rule.cpp
+ * @brief Implementation of the FailedLoginRule class.
+ * 
+ * This file contains the implementation of the FailedLoginRule class, 
+ * which is responsible for evaluating security events related to failed login attempts.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <cstddef>
 #include <stdexcept>
 

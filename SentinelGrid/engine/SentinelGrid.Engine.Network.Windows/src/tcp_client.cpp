@@ -1,3 +1,14 @@
+/**
+ * @file tcp_client.cpp
+ * @brief Implementation of the TcpClient class for managing TCP connections.
+ * 
+ * This file contains the implementation of the TcpClient class, 
+ * which is responsible for managing TCP connections, including connecting to a server and disconnecting.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <string>
 #include <string_view>
 #include <WS2tcpip.h>

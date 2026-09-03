@@ -1,3 +1,13 @@
+/**
+ * @file security.c
+ * @brief Implementation of security functions for the SentinelGrid Agent.
+ *
+ * This file contains the implementation of security-related functions, including HMAC SHA-256 calculation.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <stddef.h>
 #include <stdint.h>
 #include <Windows.h>

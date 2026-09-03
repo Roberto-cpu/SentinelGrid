@@ -1,3 +1,14 @@
+/**
+ * @file packet_decoder.cpp
+ * @brief This file contains the implementation of functions for decoding event packets and authenticated event packets.
+ *
+ * This file provides functions to decode security events and alerts from a specific binary format received over the network.
+ * It includes error handling for various decoding issues, such as invalid packet sizes, unsupported protocol versions, and authentication failures.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <cstdint>
 #include <cstdio>
 #include <span>

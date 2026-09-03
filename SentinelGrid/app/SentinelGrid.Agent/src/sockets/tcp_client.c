@@ -1,3 +1,13 @@
+/**
+ * @file tcp_client.c
+ * @brief Implementation of TCP client socket functions for the SentinelGrid Agent.
+ *
+ * This file contains the implementation of functions to initialize, connect, send data, and close a TCP client socket.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <stdio.h>
 #include <WinSock2.h>
 #include <WS2tcpip.h>

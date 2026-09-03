@@ -1,5 +1,18 @@
+/**
+ * @file replay_guard.cpp
+ * @brief Implementation of the ReplayGuard class for preventing replay attacks.
+ *
+ * This file contains the implementation of the ReplayGuard class, which is responsible for checking and recording sequence numbers 
+ * associated with agents to prevent replay attacks. 
+ * The class maintains a mapping of agent IDs to their last recorded sequence numbers and provides thread-safe access to this data.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <cstdint>
 #include <mutex>
+#include <unordered_map>
 
 #include <security/replay_guard.hpp>
 

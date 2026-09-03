@@ -1,3 +1,14 @@
+/**
+ * @file Program.cs
+ * @brief The entry point for the SentinelGrid Control Plane Worker application.
+ *
+ * This file contains the main program that sets up and runs the SentinelGrid Control Plane Worker.
+ * It configures services, including database connections, message queues, and hosted workers.
+ * 
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 using SentinelGrid.ControlPlane.Application.Persistence;
 using SentinelGrid.ControlPlane.Domain;
 using SentinelGrid.ControlPlane.Worker;

@@ -71,6 +71,9 @@ Testing/
 .cache/
 
 # Visual Studio generated files
+.vs/
+.vs.backup*/
+*.ipch
 **/.vs/
 **/x64/
 **/x86/

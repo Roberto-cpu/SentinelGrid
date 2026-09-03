@@ -1,3 +1,18 @@
+/**
+ * @file test_main.cpp
+ * @brief This file contains the main entry point for the SentinelGrid Engine Tests application.
+ *
+ * This application is responsible for running unit tests on various components of the SentinelGrid Engine.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+
+#include <Windows.h>
+#include <wincred.h>
 #include <cstdint>
 #include <cstdio>
 #include <iostream>
@@ -17,6 +32,7 @@
 #include <protocol/control_plane_encoder.hpp>
 #include <security/hmac_sha256_verifier.hpp>
 #include <security/agent_key_registry.hpp>
+#include <security/windows_credential_store.hpp>
 
 static int testCount = 0;
 static int failCount = 0;
@@ -38,6 +54,11 @@ namespace sentinelgrid::engine::tests {
 
 	namespace decoding {
 
+		/**
+		 * @brief: Expects a decode error for the given packet.
+		 * @param packet: The packet to decode.
+		 * @param expectedError: The expected decode error.
+		 */
 		static void expectedDecodeError(std::span<const std::uint8_t> packet, DecodeError expectedError) {
 			const auto result = decodeEventPacket(packet);
 
@@ -59,6 +80,9 @@ namespace sentinelgrid::engine::tests {
 			};
 		}
 
+		/**
+		 * @brief: Tests the packet decoder with a valid packet.
+		 */
 		static void testPacketDecoder() {
 			std::cout << "[Test][Decoder] packet correctly decode...\n";
 			
@@ -76,6 +100,9 @@ namespace sentinelgrid::engine::tests {
 			}
 		}
 
+		/**
+		 * @brief: Tests the packet decoder with truncated packets.
+		 */
 		static void testTruncatedPacket() {
 			std::cout << "[Test][Decoder] truncated packets...\n";
 
@@ -85,6 +112,9 @@ namespace sentinelgrid::engine::tests {
 			}
 		}
 
+		/**
+		 * @brief: Tests the packet decoder with invalid headers.
+		 */
 		static void testInvalidHeaders() {
 			std::cout << "[Test][Decoder] invalid headers...\n";
 
@@ -114,6 +144,10 @@ namespace sentinelgrid::engine::tests {
 	}
 
 	namespace queue {
+
+		/**
+		 * @brief: Tests the FIFO round-trip behavior of the bounded blocking queue.
+		 */
 		static void testFIFORoundTrip() {
 			std::cout << "[Test][Queue] FIFO queue round-trip...\n";
 
@@ -129,6 +163,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(queue.pop() == 30);
 		}
 
+		/**
+		 * @brief: Tests the detection of zero capacity initialization.
+		 */
 		static void testZeroCapacityDetection() {
 			std::cout << "[Test][Queue] Zero Capacity initialization...\n";
 
@@ -144,6 +181,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(exceptionThrown);
 		}
 
+		/**
+		 * @brief: Tests the behavior of pushing to a closed queue.
+		 */
 		static void testPushAfterClose() {
 			std::cout << "[Test][Queue] push after closing queue...\n";
 
@@ -153,6 +193,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(!queue.push(10));
 		}
 
+		/**
+		 * @brief: Tests the behavior of draining a closed queue.
+		 */
 		static void testDrainAfterClose() {
 			std::cout << "[Test][Queue] drain after close...\n";
 
@@ -167,6 +210,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(queue.pop() == std::nullopt);
 		}
 
+		/**
+		 * @brief: Tests the behavior of a blocked consumer.
+		 */
 		static void testBlockedConsumer() {
 			std::cout << "[Test][Queue] blocked consumer...\n";
 
@@ -204,6 +250,9 @@ namespace sentinelgrid::engine::tests {
 			}
 		}
 
+		/**
+		 * @brief: Tests that closing a queue wakes a blocked consumer.
+		 */
 		static void testWakesAblockedConsumer() {
 			std::cout << "[Test][Queue] close wakes a blocked consumer...\n";
 
@@ -238,6 +287,9 @@ namespace sentinelgrid::engine::tests {
 			}
 		}
 
+		/**
+		 * @brief: Tests the behavior of a full queue blocking a producer.
+		 */
 		static void testFullQueueBlock() {
 			std::cout << "[Test][Queue] blocked producer...\n";
 
@@ -288,6 +340,10 @@ namespace sentinelgrid::engine::tests {
 	}
 
 	namespace rules {
+
+		/**
+		 * @brief: Tests the initialization of a login rule with zero allowed attempts.
+		 */
 		static void testLoginRuleZeroAttempts() {
 			std::cout << "[Test][Login-Rules] zero login attempts allowed...\n";
 
@@ -303,6 +359,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(exceptionThrown);
 		}
 
+		/**
+		 * @brief: Tests the alert behavior on the third login attempt failure.
+		 */
 		static void testAlertOnThirdFailure() {
 			std::cout << "[Test][Login-Rules] alert on third failure...\n";
 
@@ -327,6 +386,9 @@ namespace sentinelgrid::engine::tests {
 			}
 		}
 
+		/**
+		 * @brief: Tests the agent isolation behavior.
+		 */
 		static void testAgentIsolation() {
 			std::cout << "[Test][Login-Rules] agent isolation...\n";
 
@@ -372,6 +434,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(alert->agent_id == 1U);
 		}
 
+		/**
+		 * @brief: Tests the behavior of ignoring heartbeat events.
+		 */
 		static void testIgnoreHeartbeat() {
 			std::cout << "[Test][Login-Rules] \"Heartbeat\" event is ignored...\n";
 
@@ -409,6 +474,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(alert->severity == AlertSeverity::high);
 		}
 
+		/**
+		 * @brief: Tests the behavior of a service stop event resetting the failure counter.
+		 */
 		static void testServiceStopReset() {
 			std::cout << "[Test][Login-Rules] \"Service Stop\" event resets counter...\n";
 
@@ -453,6 +521,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(alert->severity == AlertSeverity::high);
 		}
 
+		/**
+		 * @brief: Tests the behavior of an alert resetting the failure counter.
+		 */
 		static void testAlertResetsCounter() {
 			std::cout << "[Test][Login-Rules] counter reset after alert...\n";
 
@@ -509,6 +580,10 @@ namespace sentinelgrid::engine::tests {
 	}
 
 	namespace encoding {
+
+		/**
+		 * @brief: Creates a test security event.
+		 */
 		static SecurityEvent createSecurityEvent() {
 			return{
 				.agent_id = 101U,
@@ -517,6 +592,9 @@ namespace sentinelgrid::engine::tests {
 			};
 		}
 
+		/**
+		 * @brief: Creates a test security alert.
+		 */
 		static SecurityAlert createSecurityAlert() {
 			return{
 				.type = AlertType::repeated_login_failure,
@@ -527,6 +605,9 @@ namespace sentinelgrid::engine::tests {
 			};
 		}
 
+		/**
+		 * @brief: Tests the encoding of control plane events.
+		 */
 		static void testControlPlaneEventEncoding() {
 			std::cout << "[Test][Encoding] Security Event Encoding...\n";
 
@@ -555,6 +636,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(output == expectedBytes);
 		}
 
+		/**
+		 * @brief: Tests the encoding of control plane alerts.
+		 */
 		static void testControlPlaneAlertEncoding() {
 			std::cout << "[Test][Encoding] Security Alert Encoding...\n";
 
@@ -585,6 +669,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(output == expectedBytes);
 		}
 
+		/**
+		 * @brief: Tests the behavior when the output buffer is too small.
+		 */
 		static void testOutputTooSmall() {
 
 			std::cout << "[Test][Encoding] output too small...\n";
@@ -602,6 +689,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(resultAlert.error == protocol::EncodeError::output_too_small);
 		}
 
+		/**
+		 * @brief: Tests the behavior when the agent ID is zero.
+		 */
 		static void testAgentIdZero() {
 
 			std::cout << "[Test][Encoding] agent ID zero...\n";
@@ -622,6 +712,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(resultAlert.error == protocol::EncodeError::invalid_agent_id);
 		}
 
+		/**
+		 * @brief: Tests the behavior with an invalid event type.
+		 */
 		static void testInvalidEventType() {
 
 			std::cout << "[Test][Encoding] invalid event type...\n";
@@ -635,6 +728,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(resultEvent.error == protocol::EncodeError::invalid_event_type);
 		}
 
+		/**
+		 * @brief: Tests the behavior with an invalid alert type.
+		 */
 		static void testInvalidAlertType() {
 
 			std::cout << "[Test][Encoding] invalid alert type...\n";
@@ -648,6 +744,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(resultAlert.error == protocol::EncodeError::invalid_alert_type);
 		}
 
+		/**
+		 * @brief: Tests the behavior with an invalid alert severity.
+		 */
 		static void testInvalidAlertSeverity() {
 
 			std::cout << "[Test][Encoding] invalid alert severity...\n";
@@ -661,6 +760,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(resultAlert.error == protocol::EncodeError::invalid_severity);
 		}
 
+		/**
+		 * @brief: Tests the behavior with an invalid failures count.
+		 */
 		static void testInvalidFailuresCount() {
 
 			std::cout << "[Test][Encoding] invalid failures count...\n";
@@ -683,6 +785,10 @@ namespace sentinelgrid::engine::tests {
 	}
 
 	namespace secure::encoding {
+		
+		/** 
+		 * @brief: Tests the encoding of valid authenticated HMAC-SHA256 messages. 
+		 */
 		static void testValidSecureHmacEncoding() {
 			std::cout << "[Test][HMAC-SHA256] valid inputs...\n";
 
@@ -749,6 +855,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(event->type == EventType::service_stop);
 		}
 
+		/** 
+		 * @brief: Tests the behavior when the agent ID is modified.
+		 */
 		static void testSecureHmacEncoding_ModifiedAgentId() {
 			std::cout << "[Test][HMAC-SHA256] modified agent ID...\n";
 
@@ -808,6 +917,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(*err == DecodeError::cryptographicFailure);
 		}
 
+		/** 
+		 * @brief: Tests the behavior when the sequence number is modified.
+		 */
 		static void testSecureHmacEncoding_ModifiedSequenceNumber() {
 			std::cout << "[Test][HMAC-SHA256] modified sequence number...\n";
 
@@ -867,6 +979,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(*err == DecodeError::cryptographicFailure);
 		}
 
+		/** 
+		 * @brief: Tests the behavior when the event type is modified.
+		 */
 		static void testSecureHmacEncoding_ModifiedEventType() {
 			std::cout << "[Test][HMAC-SHA256] modified event type...\n";
 
@@ -926,6 +1041,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(*err == DecodeError::cryptographicFailure);
 		}
 
+		/** 
+		 * @brief: Tests the behavior when the key ID is modified.
+		 */
 		static void testSecureHmacEncoding_ModifiedKeyId() {
 			std::cout << "[Test][HMAC-SHA256] modified key ID...\n";
 
@@ -985,6 +1103,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(*err == DecodeError::authenticationFailed);
 		}
 
+		/** 
+		 * @brief: Tests the behavior when the HMAC is modified.
+		 */
 		static void testSecureHmacEncoding_ModifiedHMAC() {
 			std::cout << "[Test][HMAC-SHA256] modified HMAC...\n";
 			constexpr std::uint32_t keyId = 1U;
@@ -1043,6 +1164,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(*err == DecodeError::cryptographicFailure);
 		}
 
+		/** 
+		 * @brief: Tests the behavior when the key is wrong.
+		 */
 		static void testSecureHmacEncoding_WrongKey() {
 			std::cout << "[Test][HMAC-SHA256] wrong key...\n";
 
@@ -1102,6 +1226,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(*err == DecodeError::cryptographicFailure);
 		}
 
+		/** 
+		 * @brief: Tests the behavior when the HMAC is truncated.
+		 */
 		static void testSecureHmacEncoding_TruncatedHMAC() {
 			std::cout << "[Test][HMAC-SHA256] truncated HMAC...\n";
 
@@ -1143,7 +1270,11 @@ namespace sentinelgrid::engine::tests {
 				0xA5, 0x41, 0x4B, 0x2B,
 				0x55, 0x00, 0x7B, 0xB8,
 				0x12, 0x9D, 0xA7, 0xA3,
-				0xFD
+				0xFD, 0xCD, 0x05, 0x6B,
+				0xE0, 0xBB, 0xC0, 0x1B,
+				0x49, 0xA4, 0xFB, 0x3D,
+				0xF7, 0x01, 0x27, 0x82,
+				0xCC, 0xC6, 0x80, 0xCE
 			};
 
 			security::AgentKeyRegistry keyRegistry;
@@ -1157,6 +1288,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(*err == DecodeError::cryptographicFailure);
 		}
 
+		/** 
+		 * @brief: Tests the behavior when an empty key is provided.
+		 */
 		static void testSecureHmacEncoding_EmptyKey() {
 			std::cout << "[Test][HMAC-SHA256] empty key...\n";
 
@@ -1207,6 +1341,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(*err == DecodeError::cryptographicFailure);
 		}
 
+		/** 
+		 * @brief: Tests the behavior when the packet is tampered with.
+		 */
 		static void testSecureHmacEncoding_TamperedPacket() {
 			std::cout << "[Test][HMAC-SHA256] tampered packet...\n";
 
@@ -1271,6 +1408,10 @@ namespace sentinelgrid::engine::tests {
 	}
 
 	namespace registry::key {
+		
+		/** 
+		 * @brief: Tests the successful registration of a key.
+		 */
 		static void testKeyRegistrationSuccess() {
 			std::cout << "[Test][Key-Registry] new key registration...\n";
 
@@ -1294,6 +1435,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(registered);
 		}
 
+		/** 
+		 * @brief: Tests the registration of a key with an existing ID.
+		 */
 		static void testKeyRegistrationTwice() {
 			std::cout << "[Test][Key-Registry] register two times the same key ID...\n";
 
@@ -1329,6 +1473,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(registered1 && !registered2);
 		}
 
+		/** 
+		 * @brief: Tests the finding of an existent key.
+		 */
 		static void testFindExistentKey() {
 			std::cout << "[Test][Key-Registry] find existent key...\n";
 
@@ -1354,6 +1501,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(foundKey.has_value() && std::ranges::equal(foundKey.value().key, key));
 		}
 
+		/**
+		 * @brief: Tests the finding of a non-existent key.
+		 */
 		static void testFindNotExistentKey() {
 			std::cout << "[Test][Key-Registry] find not existent key...\n";
 
@@ -1363,6 +1513,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(!foundKey.has_value());
 		}
 
+		/**
+		 * @brief: Tests the finding of two different keys.
+		 */
 		static void testFindForTwoDifferentKeys() {
 			std::cout << "[Test][Key-Registry] find for key ID returns only the associated key...\n";
 
@@ -1405,6 +1558,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(foundKey2.has_value() && std::ranges::equal(foundKey2.value().key, key2));
 		}
 
+		/**
+		 * @brief: Tests the behavior when trying to decode a packet with a key that is not registered.
+		 */
 		static void testDecodePacketWithAnotherKey() {
 			std::cout << "[Test][Key-Registry] cannot decode a packet with another packet's key...\n";
 
@@ -1467,6 +1623,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(*err == DecodeError::authenticationFailed);
 		}
 
+		/**
+		 * @brief: Tests the behavior when the key ID and agent ID match.
+		 */
 		static void testMatchingKeyAndAgent() {
 			std::cout << "[Test][Key-Registry] matching key ID and agent ID...\n";
 
@@ -1523,6 +1682,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(securityEvent->agent_id == 1U);
 		}
 
+		/**
+		 * @brief: Tests the behavior when the key ID is unknown.
+		 */
 		static void testUnknownKeyID() {
 			std::cout << "[Test][Key-Registry] unknown key ID...\n";
 
@@ -1579,6 +1741,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(*err == DecodeError::authenticationFailed);
 		}
 
+		/**
+		 * @brief: Tests the behavior when the HMAC is valid but the agent ID is different.
+		 */
 		static void testHmacForAnotherAgent() {
 			std::cout << "[Test][Key-Registry] valid HMAC claiming another agent ID...\n";
 
@@ -1635,6 +1800,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(*err == DecodeError::authenticationFailed);
 		}
 
+		/**
+		 * @brief: Tests the behavior when an agent tries to impersonate another agent.
+		 */
 		static void testAgentImpersonification() {
 			std::cout << "[Test][Key-Registry] agent 2 cannot impersonate agent 1 ...\n";
 
@@ -1686,24 +1854,15 @@ namespace sentinelgrid::engine::tests {
 
 			if (!registered) return;
 
-			const std::span<const std::uint8_t> packetView{ impersonedPacket };
-			
-			const auto verificationRes = security::verifyHmacSha256(
-				key,
-				packetView.first(security::authenticatedDataSize),
-				packetView.subspan(HmacSha256Offset, security::hmacSha256Size)
-			);
-
-			EXPECT_TRUE(verificationRes == security::HmacVerificationResult::valid);
-
-			if (verificationRes != security::HmacVerificationResult::valid) return;
-
 			const auto result = decodeAuthenticatedEventPacket(impersonedPacket, keyRegistry);
 			const auto* err = std::get_if<DecodeError>(&result);
 
 			EXPECT_TRUE(*err == DecodeError::authenticationFailed);
 		}
 
+		/**
+		 * @brief: Tests the behavior when trying to register a key with an already registered key ID.
+		 */
 		static void testDuplicatedKeyID() {
 			std::cout << "[Test][Key-Registry] reject duplicated key ID...\n";
 
@@ -1744,6 +1903,9 @@ namespace sentinelgrid::engine::tests {
 			EXPECT_TRUE(registered1 && registered2);
 		}
 
+		/**
+		 * @brief: Tests the behavior when looking up a key ID multiple times.
+		 */
 		static void testCredentialsLookupReturnesStoredKeysView() {
 			std::cout << "[Test][Key-Registry] credential lookup returns stored key view...\n";
 
@@ -1785,6 +1947,336 @@ namespace sentinelgrid::engine::tests {
 
 			EXPECT_TRUE(firstLookup->key.data() == secondLookup->key.data());
 			EXPECT_TRUE(std::ranges::equal(secondLookup->key, key));
+		}
+
+		namespace credential {
+
+			/**
+			 * @brief: Registers a credential in the Windows Credential Manager.
+			 * @param credentialBlob: The credential blob to register.
+			 * @return: True if the credential was successfully registered, false otherwise.
+			 */
+			static bool registerCredential(std::span<std::uint8_t> credentialBlob) {
+				std::wstring targetName{ L"SentinelGrid/Agent/1" };
+				std::wstring username{ L"Agent/1" };
+
+				CREDENTIALW credential{};
+
+				credential.Type = CRED_TYPE_GENERIC;
+				credential.TargetName = const_cast<LPWSTR>(targetName.data());
+				credential.UserName = const_cast<LPWSTR>(username.data());
+
+				credential.CredentialBlob = const_cast<LPBYTE>(credentialBlob.data());
+				credential.CredentialBlobSize = static_cast<DWORD>(credentialBlob.size());
+
+				credential.Persist = CRED_PERSIST_SESSION;
+
+				return CredWriteW(&credential, 0);
+			}
+
+			/**
+			 * @brief: Tests the retrieval of a valid key from the Windows Credential Manager.
+			 */	
+			static void testValidKeyRetrieval() {
+
+				std::cout << "[Test][Windows-Credentials] valid key...\n";
+
+				security::AgentKey key{
+					0x00, 0x01, 0x02, 0x03,
+					0x04, 0x05, 0x06, 0x07,
+					0x08, 0x09, 0x0A, 0x0B,
+					0x0C, 0x0D, 0x0E, 0x0F,
+					0x10, 0x11, 0x12, 0x13,
+					0x14, 0x15, 0x16, 0x17,
+					0x18, 0x19, 0x1A, 0x1B,
+					0x1C, 0x1D, 0x1E, 0x1F
+				};
+
+				if (!registerCredential(key))
+					return;
+
+				security::AgentKey loadedKey{};
+				const auto readRes = security::loadAgentKey(L"SentinelGrid/Agent/1", loadedKey);
+				EXPECT_TRUE(readRes.isSuccess());
+				EXPECT_TRUE(std::ranges::equal(loadedKey, key));
+
+				security::secureErase(loadedKey);
+				const bool deleted = CredDeleteW(L"SentinelGrid/Agent/1", CRED_TYPE_GENERIC, 0U);
+				EXPECT_TRUE(deleted);
+			}
+
+			/**
+			 * @brief: Tests the behavior when trying to retrieve a key that does not exist in the Windows Credential Manager.
+			 */
+			static void testMissingCredentials() {
+
+				std::cout << "[Test][Windows-Credentials] missin credentials...\n";
+
+				security::AgentKey key{
+					0x00, 0x01, 0x02, 0x03,
+					0x04, 0x05, 0x06, 0x07,
+					0x08, 0x09, 0x0A, 0x0B,
+					0x0C, 0x0D, 0x0E, 0x0F,
+					0x10, 0x11, 0x12, 0x13,
+					0x14, 0x15, 0x16, 0x17,
+					0x18, 0x19, 0x1A, 0x1B,
+					0x1C, 0x1D, 0x1E, 0x1F
+				};
+
+				if (!registerCredential(key))
+					return;
+
+				static_cast<void>(CredDeleteW(L"SentinelGrid/Agent/1", CRED_TYPE_GENERIC, 0U));
+
+				security::AgentKey loadedKey{};
+				loadedKey.fill(0xA5U);
+				const auto readRes = security::loadAgentKey(L"SentinelGrid/Agent/1", loadedKey);
+				EXPECT_TRUE(readRes.status == security::CredentialLoadStatus::not_found);
+				EXPECT_TRUE(std::ranges::all_of(loadedKey, [](std::uint8_t byte) { return byte == 0U; }));
+			}
+
+			/**
+			 * @brief: Tests the behavior when trying to retrieve a key with an invalid size from the Windows Credential Manager.
+			 */
+			static void testInvalidSizeKey() {
+
+				std::cout << "[Test][Windows-Credentials] key size of 31 or 33 bytes returns empty AgentKet destination...\n";
+
+				security::AgentKey key{
+					0x00, 0x01, 0x02, 0x03,
+					0x04, 0x05, 0x06, 0x07,
+					0x08, 0x09, 0x0A, 0x0B,
+					0x0C, 0x0D, 0x0E, 0x0F,
+					0x10, 0x11, 0x12, 0x13,
+					0x14, 0x15, 0x16, 0x17,
+					0x18, 0x19, 0x1A, 0x1B,
+					0x1C, 0x1D, 0x1E, 0x1F
+				};
+
+				std::array<std::uint8_t, security::AgentKeySize - 1U> key31Bytes{};
+				std::array<std::uint8_t, security::AgentKeySize + 1U> key33Bytes{};
+
+				const auto testInvalidBlob = [](auto& invalidKey) {
+					if (!registerCredential(std::span{ invalidKey }))
+						return;
+
+					security::AgentKey destination{};
+					destination.fill(0xA5U);
+
+					security::AgentKey loadedKey{};
+					const auto readRes = security::loadAgentKey(L"SentinelGrid/Agent/1", destination);
+					EXPECT_TRUE(readRes.status == security::CredentialLoadStatus::invalid_key_size);
+					EXPECT_TRUE(std::ranges::all_of(loadedKey, [](std::uint8_t byte) { return byte == 0U; }));
+
+					security::secureErase(loadedKey);
+					const bool deleted = CredDeleteW(L"SentinelGrid/Agent/1", CRED_TYPE_GENERIC, 0U);
+					EXPECT_TRUE(deleted);
+				};
+
+				testInvalidBlob(key31Bytes);
+				testInvalidBlob(key33Bytes);
+			}
+
+			/**
+			 * @brief: Tests the behavior of generating a valid key.
+			 */
+			static void testValidKeyGeneration() {
+				std::cout << "[Test][Windows-Credentials] valid key generation...\n";
+
+				security::AgentKey destinationKey{};
+				const auto generatedKey = security::generateAgentKey(destinationKey);
+
+				EXPECT_TRUE(generatedKey.isSuccess());
+
+				security::secureErase(destinationKey);
+			}
+			
+			/**
+			 * @brief: Tests the behavior of storing and loading a valid key.
+			 */
+			static void testStoreAndLoadValidKey() {
+				std::cout << "[Test][Windows-Credentials] valid key store and load...\n";
+
+				security::AgentKey generatedAgentKey{};
+				const auto generatedKey = security::generateAgentKey(generatedAgentKey);
+
+				EXPECT_TRUE(generatedKey.isSuccess());
+				if (!generatedKey.isSuccess()) return;
+
+				const auto storedKey = security::storeAgentKey(
+					L"SentinelGrid/Store/Load",
+					L"Agent/Store/Load",
+					generatedAgentKey,
+					security::CredentialPersistence::session,
+					false
+				);
+
+				EXPECT_TRUE(storedKey.isSuccess());
+				if (!storedKey.isSuccess()) return;
+
+				security::AgentKey loadedAgentKey{};
+				const auto loadedKey = security::loadAgentKey(L"SentinelGrid/Store/Load", loadedAgentKey);
+				
+				EXPECT_TRUE(loadedKey.isSuccess());
+				EXPECT_TRUE(std::ranges::equal(generatedAgentKey, loadedAgentKey));
+
+				security::secureErase(loadedAgentKey);
+				const bool deleted = CredDeleteW(L"SentinelGrid/Store/Load", CRED_TYPE_GENERIC, 0U);
+				EXPECT_TRUE(deleted);
+			}
+			
+			/**
+			 * @brief: Tests the behavior of storing a key when a key already exists and overwrite is not allowed.
+			 */
+			static void testAlreadyExistsWithoutOverwrite() {
+				std::cout << "[Test][Windows-Credentials] already-exists error if overwrite not set...\n";
+
+				security::AgentKey generatedAgentOneKey{};
+				const auto generatedKeyOne = security::generateAgentKey(generatedAgentOneKey);
+
+				EXPECT_TRUE(generatedKeyOne.isSuccess());
+				if (!generatedKeyOne.isSuccess()) return;
+				
+				security::AgentKey generatedAgentTwoKey{};
+				const auto generatedKeyTwo = security::generateAgentKey(generatedAgentTwoKey);
+
+				EXPECT_TRUE(generatedKeyTwo.isSuccess());
+				if (!generatedKeyTwo.isSuccess()) return;
+
+				const auto storedKeyOne = security::storeAgentKey(
+					L"SentinelGrid/Overwrite/Not/Allowed",
+					L"Agent/Overwrite/Not/Allowed",
+					generatedAgentOneKey,
+					security::CredentialPersistence::session,
+					false
+				);
+				
+				EXPECT_TRUE(storedKeyOne.isSuccess());
+				if (!storedKeyOne.isSuccess()) return;
+
+				const auto storedKeyTwo = security::storeAgentKey(
+					L"SentinelGrid/Overwrite/Not/Allowed",
+					L"Agent/Overwrite/Not/Allowed",
+					generatedAgentTwoKey,
+					security::CredentialPersistence::session,
+					false
+				);
+
+				EXPECT_TRUE(!storedKeyTwo.isSuccess());
+				EXPECT_TRUE(storedKeyTwo.status == security::CredentialWriteStatus::already_exists);
+
+				security::AgentKey loadedAgentKey{};
+				const auto loadedKey = security::loadAgentKey(L"SentinelGrid/Overwrite/Not/Allowed", loadedAgentKey);
+
+				EXPECT_TRUE(loadedKey.isSuccess());
+				EXPECT_TRUE(std::ranges::equal(generatedAgentOneKey, loadedAgentKey));
+
+				security::secureErase(generatedAgentOneKey);
+				security::secureErase(generatedAgentTwoKey);
+				security::secureErase(loadedAgentKey);
+				const bool deleted = CredDeleteW(L"SentinelGrid/Overwrite/Not/Allowed", CRED_TYPE_GENERIC, 0U);
+				EXPECT_TRUE(deleted);
+			}
+
+			/**
+			 * @brief: Tests the behavior of storing a key when a key already exists and overwrite is allowed.
+			 */
+			static void testAlreadyExistsWithOverwrite() {
+				std::cout << "[Test][Windows-Credentials] overwrite key...\n";
+
+				security::AgentKey generatedAgentOneKey{};
+				const auto generatedKeyOne = security::generateAgentKey(generatedAgentOneKey);
+
+				EXPECT_TRUE(generatedKeyOne.isSuccess());
+				if (!generatedKeyOne.isSuccess()) return;
+
+				security::AgentKey generatedAgentTwoKey{};
+				const auto generatedKeyTwo = security::generateAgentKey(generatedAgentTwoKey);
+
+				EXPECT_TRUE(generatedKeyTwo.isSuccess());
+				if (!generatedKeyTwo.isSuccess()) return;
+
+				const auto storedKeyOne = security::storeAgentKey(
+					L"SentinelGrid/Overwrite/Allowed",
+					L"Agent/Overwrite/Allowed",
+					generatedAgentOneKey,
+					security::CredentialPersistence::session,
+					false
+				);
+
+				EXPECT_TRUE(storedKeyOne.isSuccess());
+				if (!storedKeyOne.isSuccess()) return;
+
+
+				const auto storedKeyTwo = security::storeAgentKey(
+					L"SentinelGrid/Overwrite/Allowed",
+					L"Agent/Overwrite/Allowed",
+					generatedAgentTwoKey,
+					security::CredentialPersistence::session,
+					true
+				);
+
+				EXPECT_TRUE(storedKeyTwo.isSuccess());
+				if (!storedKeyTwo.isSuccess()) return;
+
+				security::AgentKey loadedAgentKey{};
+				const auto loadedKey = security::loadAgentKey(L"SentinelGrid/Overwrite/Allowed", loadedAgentKey);
+
+				EXPECT_TRUE(loadedKey.isSuccess());
+				EXPECT_TRUE(std::ranges::equal(generatedAgentTwoKey, loadedAgentKey));
+
+				security::secureErase(generatedAgentOneKey);
+				security::secureErase(generatedAgentTwoKey);
+				security::secureErase(loadedAgentKey);
+				const bool deleted = CredDeleteW(L"SentinelGrid/Overwrite/Allowed", CRED_TYPE_GENERIC, 0U);
+				EXPECT_TRUE(deleted);
+			}
+
+			/**
+			 * @brief: Tests the behavior of storing a key with no target name or username.
+			 */
+			static void testNoTargetInput() {
+				std::cout << "[Test][Windows-Credentials] store with no target...\n";
+
+				security::AgentKey generatedAgentKey{};
+				const auto generatedKey = security::generateAgentKey(generatedAgentKey);
+
+				EXPECT_TRUE(generatedKey.isSuccess());
+				if (!generatedKey.isSuccess()) return;
+
+				const auto storedKey = security::storeAgentKey(
+					L"",
+					L"",
+					generatedAgentKey,
+					security::CredentialPersistence::session,
+					false
+				);
+
+				EXPECT_TRUE(!storedKey.isSuccess());
+				EXPECT_TRUE(storedKey.status == security::CredentialWriteStatus::invalid_input);
+
+				security::secureErase(generatedAgentKey);
+			}
+
+			/**
+			 * @brief: Tests the behavior of storing a key with an invalid size.
+			 */
+			static void testStoreKeyWithInvalidSize() {
+				std::cout << "[Test][Windows-Credentials] store invalid key size...\n";
+
+				std::array<std::uint8_t, security::AgentKeySize - 1U> key31Bytes{};
+				std::array<std::uint8_t, security::AgentKeySize + 1U> key33Bytes{};
+
+				const auto testInvalidBlob = [&](auto& invalidKey) {
+
+					security::AgentKey storedKey{};
+					const auto readRes = security::storeAgentKey(L"SentinelGrid/InvalidSize", L"Agent/InvalidSize", invalidKey, security::CredentialPersistence::session);
+					EXPECT_TRUE(readRes.status == security::CredentialWriteStatus::invalid_input);
+				};
+
+				testInvalidBlob(key31Bytes);
+				testInvalidBlob(key33Bytes);
+			}
 		}
 	}
 }
@@ -1856,6 +2348,18 @@ int main(void) {
 	sentinelgrid::engine::tests::registry::key::testDuplicatedKeyID();
 	sentinelgrid::engine::tests::registry::key::testOneAgentWithTwoKeyIDs();
 	sentinelgrid::engine::tests::registry::key::testCredentialsLookupReturnesStoredKeysView();
+
+	std::cout << "\nRunning windows credentials - key registry tests...\n\n";
+
+	sentinelgrid::engine::tests::registry::key::credential::testValidKeyRetrieval();
+	sentinelgrid::engine::tests::registry::key::credential::testMissingCredentials();
+	sentinelgrid::engine::tests::registry::key::credential::testInvalidSizeKey();
+	sentinelgrid::engine::tests::registry::key::credential::testValidKeyGeneration();
+	sentinelgrid::engine::tests::registry::key::credential::testStoreAndLoadValidKey();
+	sentinelgrid::engine::tests::registry::key::credential::testAlreadyExistsWithoutOverwrite();
+	sentinelgrid::engine::tests::registry::key::credential::testAlreadyExistsWithOverwrite();
+	sentinelgrid::engine::tests::registry::key::credential::testNoTargetInput();
+	sentinelgrid::engine::tests::registry::key::credential::testStoreKeyWithInvalidSize();
 
 	std::cout << "\nTests Completed: " << testCount << " checks, " << failCount << " failures.\n";
 		

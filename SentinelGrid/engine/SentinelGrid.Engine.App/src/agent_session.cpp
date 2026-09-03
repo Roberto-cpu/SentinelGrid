@@ -1,3 +1,14 @@
+/**
+ * @file agent_session.cpp
+ * @brief Implementation of the agent session handling logic.
+ *
+ * This file contains the implementation of the `runSessionAgent` function, which manages the lifecycle of an agent session.
+ * It handles receiving packets from the agent, decoding them, checking for replay attacks, and pushing valid events into the event queue.
+ *
+ * @author Roberto Garzone
+ * @date 2026-09-03
+ */
+
 #include <cstdlib>
 #include <iostream>
 #include <array>

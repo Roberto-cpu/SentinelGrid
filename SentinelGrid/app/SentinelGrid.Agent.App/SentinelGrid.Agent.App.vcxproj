@@ -167,6 +167,9 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SentinelGrid.Agent.Security.Windows\SentinelGrid.Agent.Security.Windows.vcxproj">
+      <Project>{7feebdd9-197c-4d39-bf69-ffd7845e32fc}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\SentinelGrid.Agent\SentinelGrid.Agent.vcxproj">
       <Project>{ccbf1dfb-9931-4096-ac7f-8a6a8a614290}</Project>
     </ProjectReference>

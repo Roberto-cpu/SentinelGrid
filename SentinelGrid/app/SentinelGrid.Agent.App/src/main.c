@@ -9,6 +9,9 @@
  */
 
 #include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <wchar.h>
 
 #include <agent/codecs/security_event.h>
 #include <agent/codecs/event_codec.h>
@@ -16,6 +19,7 @@
 #include <agent/protocols/packet_codec.h>
 #include <agent/sockets/tcp_client.h>
 #include <utilities/agent_options.h>
+#include <windows_agent_key_store.h>
 
 int main(int argc, char* argv[]) {
 	AgentOptions options = { 0 };
@@ -29,78 +33,109 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	printf("SentinelGrid agent %d started\n", options.agent_id);
+	int exitCode = EXIT_FAILURE;
 
-	SecurityEvent login_failed1 = {
-		options.agent_id,
-		1ULL,
-		EVENT_LOGIN_FAILED
-	};
-	
-	SecurityEvent login_failed2 = {
-		options.agent_id,
-		2ULL,
-		EVENT_LOGIN_FAILED
-	};
-	
-	SecurityEvent login_failed3 = {
-		options.agent_id,
-		3ULL,
-		EVENT_LOGIN_FAILED
-	};
+	uint8_t agentKey[SENTINELGRID_AGENT_KEY_SIZE] = { 0 };
+	wchar_t credentialTarget[64] = { 0 };
 
-	uint8_t packet_h[EVENT_PACKET_SIZE] = { 0 };
-	uint8_t packet_l[EVENT_PACKET_SIZE] = { 0 };
-	uint8_t packet_s[EVENT_PACKET_SIZE] = { 0 };
-	
+	const int targetLength = swprintf(
+		credentialTarget,
+		sizeof credentialTarget / sizeof credentialTarget[0],
+		L"SentinelGrid/Agent/%u",
+		(unsigned int)options.agent_id
+	);
+
+	if (targetLength < 0) {
+		fprintf(
+			stderr,
+			"Unable to construct credential target.\n"
+		);
+
+		goto cleanup;
+	}
+
 	TcpClient client = { 0 };
 	initTcpClient(&client);
 
+	printf("SentinelGrid agent %d started\n", options.agent_id);
+	
+	const AgentKeyLoadResult loadResult = loadAgentKey(credentialTarget, agentKey, sizeof agentKey);
+
+	if (loadResult.status != AGENT_KEY_LOAD_SUCCESS) {
+		fprintf(
+			stderr,
+			"Unable to load agent key for agent %d. Error code: %d\n",
+			(unsigned int)options.agent_id,
+			(unsigned int)loadResult.native_error_code
+		);
+		goto cleanup;
+	}
+
 	if (!tcpClientConnect(&client, "127.0.0.1", 5050U)) {
-		printf("Unable to connect to the engine.\n");
-		tcpClientClose(&client);
-		return EXIT_FAILURE;
+		fprintf(
+			stderr,
+			"Unable to connect to the engine.\n"
+		);
+		
+		goto cleanup;
 	}
 
-	if (!encodeEventPacket(&login_failed1, packet_h, sizeof packet_h)) {
-		printf("Unable to encode event packet.\n");
-		return EXIT_FAILURE;
-	}
+	const SecurityEvent events[] = {
+		{
+			options.agent_id,
+			1ULL,
+			EVENT_LOGIN_FAILED
+		},
 
-	if (!tcpClientSendAll(&client, packet_h, sizeof packet_h)) {
-		printf("Unable to send the packet.\n");
-		tcpClientClose(&client);
-		return EXIT_FAILURE;
-	}
+		{
+			options.agent_id,
+			2ULL,
+			EVENT_LOGIN_FAILED
+		},
 
-	printf("Heartbeat packet correctly sent.\n");
+		{
+			options.agent_id,
+			3ULL,
+			EVENT_LOGIN_FAILED
+		}
+	};
 
-	if (!encodeEventPacket(&login_failed2, packet_l, sizeof packet_l)) {
-		printf("Unable to encode event packet.\n");
-		return EXIT_FAILURE;
-	}
+	const uint32_t keyId = options.agent_id;
 
-	if (!tcpClientSendAll(&client, packet_l, sizeof packet_l)) {
-		printf("Unable to send the packet.\n");
-		tcpClientClose(&client);
-		return EXIT_FAILURE;
-	}
+	for (size_t i = 0; i < sizeof events / sizeof events[0]; i++) {
+		uint8_t packet[AUTHENTICATED_PACKET_SIZE] = { 0 };
 
-	printf("Login failed packet correctly sent.\n");
+		if (!encodeAuthenticatedEvent(&events[i], keyId, agentKey, sizeof agentKey, packet)) {
+			fprintf(
+				stderr,
+				"Unable to encode authenticated packet.\n"
+			);
 
-	if (!encodeEventPacket(&login_failed3, packet_s, sizeof packet_s)) {
-		printf("Unable to encode event packet.\n");
-		return EXIT_FAILURE;
-	}
+			goto cleanup;
+		}
 
-	if (!tcpClientSendAll(&client, packet_s, sizeof packet_s)) {
-		printf("Unable to send the packet.\n");
-		tcpClientClose(&client);
-		return EXIT_FAILURE;
+		if (!tcpClientSendAll(&client, packet, sizeof packet)) {
+			fprintf(
+				stderr,
+				"Unable to send encoded authenticated packet.\n"
+			);
+
+			goto cleanup;
+		}
+
+		printf(
+			"Authenticated packet { type=%u; sequence=%llu } correctly sent.\n", 
+			(unsigned int)events[i].type, 
+			(unsigned long long)events[i].sequence_number
+		);
 	}
 
 	printf("Service stop packet correctly sent.\n");
+	exitCode = EXIT_SUCCESS;
 
+cleanup:
 	tcpClientClose(&client);
-	return EXIT_SUCCESS;
+	secureEraseAngetKey(agentKey, sizeof agentKey);
+
+	return exitCode;
 }

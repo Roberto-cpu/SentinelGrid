@@ -70,7 +70,7 @@ namespace sentinelgrid::engine::app {
 				const auto replayRes = replayGuard.checkAndRecord(event->agent_id, event->sequence_number);
 				if (replayRes != security::ReplayDecision::accepted) {
 					std::cerr << "Replay protection rejected the event.\n";
-					status == SessionStatus::replayRejected;
+					status = SessionStatus::replayRejected;
 					break;
 				}
 

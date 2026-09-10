@@ -5,7 +5,7 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="app/SentinelGrid.Agent.App/SentinelGrid.Agent.App.vcxproj" Id="902e29ad-a9eb-45ee-8ba7-f71b210f82b8" />
-  <Project Path="app/SentinelGrid.Agent.Security.Windows/SentinelGrid.Agent.Security.Windows.vcxproj" Id="7feebdd9-197c-4d39-bf69-ffd7845e32fc" />
+  <Project Path="app/SentinelGrid.Agent.Security.Windows/SentinelGrid.Agent.Security.Windows.vcxproj" Id="75a7e364-ebdc-4df9-a626-0ddbb0a665b8" />
   <Project Path="app/SentinelGrid.Agent.Tests/SentinelGrid.Agent.Tests.vcxproj" Id="f3d9e176-df01-4fa1-bf3d-5e4771a82e12" />
   <Project Path="app/SentinelGrid.Agent/SentinelGrid.Agent.vcxproj" Id="ccbf1dfb-9931-4096-ac7f-8a6a8a614290" />
   <Project Path="control-plane/SentinelGrid.ControlPlane.Application/SentinelGrid.ControlPlane.Application.csproj" />

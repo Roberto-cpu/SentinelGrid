@@ -92,7 +92,7 @@ void printEvent(const SecurityEvent* event) {
 		return;
 
 	printf(
-		"Agent=%u, Sequence=%llu, EventType=%s\n",
+		"[*] Agent=%u, Sequence=%llu, EventType=%s\n",
 		(unsigned)event->agent_id,
 		(unsigned long long) event->sequence_number,
 		eventTypeToString(event->type)
@@ -101,7 +101,7 @@ void printEvent(const SecurityEvent* event) {
 
 void printBytes(const uint8_t* bytes, size_t size) {
 	for (size_t idx = 0; idx < size; idx++)
-		printf("%02X ", bytes[idx]);
+		printf("[*] %02X ", bytes[idx]);
 
 	printf("\n");
 }

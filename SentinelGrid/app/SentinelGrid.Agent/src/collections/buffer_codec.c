@@ -57,7 +57,7 @@ int removeOldestEvent(EventBuffer* buffer, SecurityEvent* removedEvent) {
 		return 0;
 
 	if (buffer->count == 0) {
-		printf("Unable to remove items: the buffer is empty\n");
+		printf("[-] Unable to remove items: the buffer is empty\n");
 		return 0;
 	}
 
@@ -74,7 +74,7 @@ void printBuffer(const EventBuffer* buffer) {
 		return;
 
 	printf(
-		"\nEvents buffer: %zu/%zu events\n",
+		"\n[*] Events buffer: %zu/%zu events\n",
 		buffer->count,
 		buffer->capacity
 	);

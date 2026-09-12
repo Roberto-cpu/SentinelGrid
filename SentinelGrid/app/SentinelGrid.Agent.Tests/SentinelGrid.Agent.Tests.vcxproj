@@ -97,7 +97,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)app\SentinelGrid.Agent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs;$(SolutionDir)app\SentinelGrid.Agent\include;$(SolutionDir)app\SentinelGrid.Agent.Security.Windows\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -118,7 +118,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)app\SentinelGrid.Agent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs;$(SolutionDir)app\SentinelGrid.Agent\include;$(SolutionDir)app\SentinelGrid.Agent.Security.Windows\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -137,7 +137,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)app\SentinelGrid.Agent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs;$(SolutionDir)app\SentinelGrid.Agent\include;$(SolutionDir)app\SentinelGrid.Agent.Security.Windows\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -158,7 +158,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)app\SentinelGrid.Agent\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs;$(SolutionDir)app\SentinelGrid.Agent\include;$(SolutionDir)app\SentinelGrid.Agent.Security.Windows\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -171,6 +171,12 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\authenticated_packet_tests.c" />
+    <ClCompile Include="src\buffer_codec_tests.c" />
+    <ClCompile Include="src\event_codec_tests.c" />
+    <ClCompile Include="src\packet_codec_tests.c" />
+    <ClCompile Include="src\test_framework.c" />
+    <ClCompile Include="src\windows_agent_key_store_tests.c" />
     <ClCompile Include="test_main.c" />
   </ItemGroup>
   <ItemGroup>
@@ -180,6 +186,14 @@
     <ProjectReference Include="..\SentinelGrid.Agent\SentinelGrid.Agent.vcxproj">
       <Project>{ccbf1dfb-9931-4096-ac7f-8a6a8a614290}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libs\authenticated_packet_tests.h" />
+    <ClInclude Include="libs\buffer_codec_tests.h" />
+    <ClInclude Include="libs\event_codec_tests.h" />
+    <ClInclude Include="libs\packet_codec_tests.h" />
+    <ClInclude Include="libs\test_framework.h" />
+    <ClInclude Include="libs\windows_agent_key_store_tests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

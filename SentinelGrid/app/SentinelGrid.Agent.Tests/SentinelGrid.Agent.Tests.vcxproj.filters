@@ -13,10 +13,51 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="File di origine\NewFilter1">
+      <UniqueIdentifier>{b7787248-7163-4f6a-95b2-2cccc0020faa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test_main.c">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="src\test_framework.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\event_codec_tests.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\buffer_codec_tests.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\packet_codec_tests.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\authenticated_packet_tests.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows_agent_key_store_tests.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libs\test_framework.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\event_codec_tests.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\buffer_codec_tests.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\packet_codec_tests.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\windows_agent_key_store_tests.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\authenticated_packet_tests.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -46,7 +46,7 @@ struct AgentCredentialConfiguration {
 
 int main() {
 
-	std::cout << "SentinelGrid Engine start.\n\n";
+	std::cout << "[+] SentinelGrid Engine start.\n\n";
 
 	using namespace sentinelgrid::engine;
 
@@ -73,7 +73,7 @@ int main() {
 		if (!loadResult.isSuccess()) {
 			security::secureErase(loadedKey);
 
-			std::cerr << "Unable to load credential for agent " << configuration.agentId << ".\n"
+			std::cerr << "[-] Unable to load credential for agent " << configuration.agentId << ".\n"
 				<< "Status: " << static_cast<int>(loadResult.status)
 				<< ", WinErr: " << loadResult.nativeErrorCode << "\n";
 
@@ -84,7 +84,7 @@ int main() {
 		security::secureErase(loadedKey);
 
 		if (!registered) {
-			std::cerr << "Duplicated key ID while configuring agent " << configuration.agentId << ".\n";
+			std::cerr << "[-] Duplicated key ID while configuring agent " << configuration.agentId << ".\n";
 
 			return EXIT_FAILURE;
 		}
@@ -99,31 +99,31 @@ int main() {
 	WinsockRuntime winsock;
 
 	if (!winsock.isReady()) {
-		std::cerr << "WinSock initialization failed.\n Errcode: " 
+		std::cerr << "[-] WinSock initialization failed.\n Errcode: " 
 			<< winsock.errorCode() << "\n";
 		return EXIT_FAILURE;
 	}
 
-	std::cout << "WinSock successfully initialized.\n";
+	std::cout << "[+] WinSock successfully initialized.\n";
 	
 	TcpServer server;
 
 	if (!server.start(5050U)) {
-		std::cerr << "Unable to start the server TCP on port 5050.\n";
+		std::cerr << "[-] Unable to start the server TCP on port 5050.\n";
 		return EXIT_FAILURE;
 	}
 
-	std::cout << "SentinelGrid TCP server listening on: 127.0.0.1:5050.\n";
-	std::cout << "Waiting for Agent connection...\n";
+	std::cout << "[+] SentinelGrid TCP server listening on: 127.0.0.1:5050.\n";
+	std::cout << "[*] Waiting for Agent connection...\n";
 
 	TcpClient controlPlaneClient;
 
 	if (!controlPlaneClient.connect("127.0.0.1", 6060U)) {
-		std::cerr << "Unable to connect to the server on port 6060.\n";
+		std::cerr << "[-] Unable to connect to the server on port 6060.\n";
 		return EXIT_FAILURE;
 	}
 
-	std::cout << "Client connected on 127.0.0.1:6060.\n";
+	std::cout << "[+] Client connected on 127.0.0.1:6060.\n";
 
 
 	std::atomic_bool publicationFailed{ false };
@@ -145,7 +145,7 @@ int main() {
 				if (!event.has_value())
 					break;
 
-				std::cout << "Sending event: Agent=" << event->agent_id
+				std::cout << "[*] Sending event: Agent=" << event->agent_id
 					<< ", Sequence=" << event->sequence_number
 					<< ", Type=" << eventTypeToString(event->type)
 					<< "\n";
@@ -154,7 +154,7 @@ int main() {
 				const auto eventEncodeResult = protocol::encodeControlPlaneMessage(*event, eventFrame);
 				
 				if (!eventEncodeResult.is_success()) {
-					std::cerr << "Unable to encode the event.\n";
+					std::cerr << "[-] Unable to encode the event.\n";
 					publicationFailed = true;
 					eventQueue.close();
 					break;
@@ -169,7 +169,7 @@ int main() {
 				);
 
 				if (!eventSendResult.isSuccess()) {
-					std::cerr << "Unable to publish the event.\n"
+					std::cerr << "[-] Unable to publish the event.\n"
 						<< "Sent bytes: " << eventSendResult.sentBytes
 						<< ", Error: " << eventSendResult.errorCode << "\n";
 					publicationFailed = true;
@@ -178,13 +178,13 @@ int main() {
 				}
 
 				if (publicationFailed.load()) {
-					std::cerr << "Control-Plane publication failed.\n";
+					std::cerr << "[-] Control-Plane publication failed.\n";
 					return EXIT_FAILURE;
 				}
 
 				const auto loginAlert = loginRule.evaluate(*event);
 				if (loginAlert.has_value()) {
-					std::cout << "Sending alert: Type=" << alertTypeToString(loginAlert->type)
+					std::cout << "[*] Sending alert: Type=" << alertTypeToString(loginAlert->type)
 						<< ", Severity=" << alertSeverityToString(loginAlert->severity)
 						<< ", Agent=" << loginAlert->agent_id
 						<< ", Sequence=" << loginAlert->triggering_sequence
@@ -195,7 +195,7 @@ int main() {
 					const auto alertEncodeResult = protocol::encodeControlPlaneMessage(*loginAlert, alertFrame);
 
 					if (!alertEncodeResult.is_success()) {
-						std::cerr << "Unable to encode alert.\n";
+						std::cerr << "[-] Unable to encode alert.\n";
 						publicationFailed = true;
 						eventQueue.close();
 						break;
@@ -210,7 +210,7 @@ int main() {
 					);
 
 					if (!alertSedResult.isSuccess()) {
-						std::cerr << "Unable to publish the alert.\n";
+						std::cerr << "[-] Unable to publish the alert.\n";
 						publicationFailed = true;
 						eventQueue.close();
 						break;
@@ -221,7 +221,7 @@ int main() {
 				processedEvents++;
 			}
 
-			std::cout << "Event processor stopped.\n";
+			std::cout << "[+] Event processor stopped.\n";
 		}
 	};
 
@@ -229,11 +229,11 @@ int main() {
 		auto agentSocket = server.acceptClient();
 		
 		if (!agentSocket.isValid()) {
-			std::cerr << "Unable to accept Agent \"" << (i + 1) << "\" connection.\n";
+			std::cerr << "[-] Unable to accept Agent \"" << (i + 1) << "\" connection.\n";
 			break;
 		}
 
-		std::cout << "Opened session for agent \"" << (i + 1) << "\".\n";
+		std::cout << "[*] Opened session for agent \"" << (i + 1) << "\".\n";
 
 		sessionWorkers.emplace_back(
 			[agentSocket = std::move(agentSocket), &eventQueue, &sessionResults, i, &keyRegistry, &replayGuard]() mutable {
@@ -259,12 +259,12 @@ int main() {
 	server.stop();
 
 	if (server.isRunning()) {
-		std::cerr << "Server did not stop correctly.\n";
+		std::cerr << "[-] Server did not stop correctly.\n";
 		return EXIT_FAILURE;
 	}
 
-	std::cout << "Server stopped.\n";
-	std::cout << "Processed Events: " << processedEvents << "/" << totalEvents << ".\n";
+	std::cout << "[+] Server stopped.\n";
+	std::cout << "[*] Processed Events: " << processedEvents << "/" << totalEvents << ".\n";
 
 	return  EXIT_SUCCESS;
 }

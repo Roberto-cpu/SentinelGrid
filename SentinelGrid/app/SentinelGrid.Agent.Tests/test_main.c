@@ -20,6 +20,7 @@
 #include <buffer_codec_tests.h>
 #include <packet_codec_tests.h>
 #include <windows_agent_key_store_tests.h>
+#include <windows_agent_sequence_store_tests.h>
 
 /**
  * @brief Main function to run all unit tests.
@@ -31,12 +32,13 @@
  * @return EXIT_SUCCESS if all tests pass, EXIT_FAILURE otherwise.
  */
 int main(void) {
-	printf("SentinelGrig Agent Tests start\n");
+	printf("[Test-Suite] SentinelGrig Agent Tests start\n");
 
 	runEventCodecTests();
 	runBufferCodecTests();
 	runPacketCodecTests();
 	runWindowsAgentKeyStoreTests();
+	runWindowsAgentSequenceStoreTests();
 
 	printTestSummary();
 	return g_failureCount == 0U ? EXIT_SUCCESS : EXIT_FAILURE;

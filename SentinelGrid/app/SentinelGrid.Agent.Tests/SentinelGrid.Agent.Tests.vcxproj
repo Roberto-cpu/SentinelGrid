@@ -176,11 +176,15 @@
     <ClCompile Include="src\packet_codec_tests.c" />
     <ClCompile Include="src\test_framework.c" />
     <ClCompile Include="src\windows_agent_key_store_tests.c" />
+    <ClCompile Include="src\windows_agent_sequence_store_tests.c" />
     <ClCompile Include="test_main.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SentinelGrid.Agent.Security.Windows\SentinelGrid.Agent.Security.Windows.vcxproj">
       <Project>{75a7e364-ebdc-4df9-a626-0ddbb0a665b8}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\SentinelGrid.Agent.State.Windows\SentinelGrid.Agent.State.Windows.vcxproj">
+      <Project>{454ef5b9-5318-45d6-8102-f5b706a0654f}</Project>
     </ProjectReference>
     <ProjectReference Include="..\SentinelGrid.Agent\SentinelGrid.Agent.vcxproj">
       <Project>{ccbf1dfb-9931-4096-ac7f-8a6a8a614290}</Project>
@@ -192,6 +196,7 @@
     <ClInclude Include="libs\packet_codec_tests.h" />
     <ClInclude Include="libs\test_framework.h" />
     <ClInclude Include="libs\windows_agent_key_store_tests.h" />
+    <ClInclude Include="libs\windows_agent_sequence_store_tests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

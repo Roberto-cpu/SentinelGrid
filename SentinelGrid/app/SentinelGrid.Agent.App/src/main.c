@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 	if (targetLength < 0) {
 		fprintf(
 			stderr,
-			"Unable to construct credential target.\n"
+			"[-] Unable to construct credential target.\n"
 		);
 
 		goto cleanup;
@@ -58,14 +58,14 @@ int main(int argc, char* argv[]) {
 	TcpClient client = { 0 };
 	initTcpClient(&client);
 
-	printf("SentinelGrid agent %d started\n", options.agent_id);
+	printf("[+] SentinelGrid agent %d started\n", options.agent_id);
 	
 	const AgentKeyLoadResult loadResult = loadAgentKey(credentialTarget, agentKey, sizeof agentKey);
 
 	if (loadResult.status != AGENT_KEY_LOAD_SUCCESS) {
 		fprintf(
 			stderr,
-			"Unable to load agent key for agent %d. Error code: %d\n",
+			"[-] Unable to load agent key for agent %d. Error code: %d\n",
 			(unsigned int)options.agent_id,
 			(unsigned int)loadResult.native_error_code
 		);
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 	if (!tcpClientConnect(&client, "127.0.0.1", 5050U)) {
 		fprintf(
 			stderr,
-			"Unable to connect to the engine.\n"
+			"[-] Unable to connect to the engine.\n"
 		);
 		
 		goto cleanup;
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
 		if (!encodeAuthenticatedEvent(&event, keyId, agentKey, sizeof agentKey, packet)) {
 			fprintf(
 				stderr,
-				"Unable to encode authenticated packet.\n"
+				"[-] Unable to encode authenticated packet.\n"
 			);
 
 			goto cleanup;
@@ -118,20 +118,20 @@ int main(int argc, char* argv[]) {
 		if (!tcpClientSendAll(&client, packet, sizeof packet)) {
 			fprintf(
 				stderr,
-				"Unable to send encoded authenticated packet.\n"
+				"[-] Unable to send encoded authenticated packet.\n"
 			);
 
 			goto cleanup;
 		}
 
 		printf(
-			"Authenticated packet { type=%u; sequence=%llu } correctly sent.\n", 
+			"[*] Authenticated packet { type=%u; sequence=%llu } correctly sent.\n", 
 			(unsigned int)event.type, 
 			(unsigned long long)event.sequence_number
 		);
 	}
 
-	printf("Service stop packet correctly sent.\n");
+	printf("[+] Service stop packet correctly sent.\n");
 	exitCode = EXIT_SUCCESS;
 
 cleanup:

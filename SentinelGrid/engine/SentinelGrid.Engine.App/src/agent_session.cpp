@@ -40,19 +40,19 @@ namespace sentinelgrid::engine::app {
 
 
 			if (receiveRes.status == sentinelgrid::engine::network::ReceiveStatus::peer_closed && receiveRes.receivedBytes == 0) {
-				std::cout << "The Agent has closed the connection\n";
+				std::cout << "[+] The Agent has closed the connection\n";
 				status = SessionStatus::cleanDisconnect;
 				break;
 			}
 
 			if (receiveRes.status == sentinelgrid::engine::network::ReceiveStatus::peer_closed && receiveRes.receivedBytes > 0) {
-				std::cerr << "Unexpected closed connection.\n";
+				std::cerr << "[!] Unexpected closed connection.\n";
 				status = SessionStatus::truncatedPacket;
 				break;
 			}
 
 			if (receiveRes.status == sentinelgrid::engine::network::ReceiveStatus::socket_error) {
-				std::cerr << "Socket Crashed.\n" <<
+				std::cerr << "[!] Socket Crashed.\n" <<
 					"Bytes received: " << receiveRes.receivedBytes << ".\n" <<
 					"Error code: " << receiveRes.errorCode << "\n";
 
@@ -69,13 +69,13 @@ namespace sentinelgrid::engine::app {
 				
 				const auto replayRes = replayGuard.checkAndRecord(event->agent_id, event->sequence_number);
 				if (replayRes != security::ReplayDecision::accepted) {
-					std::cerr << "Replay protection rejected the event.\n";
+					std::cerr << "[!] Replay protection rejected the event.\n";
 					status = SessionStatus::replayRejected;
 					break;
 				}
 
 				if (!eventQueue.push(*event)) {
-					std::cerr << "Unable to push the event into the queue.\n";
+					std::cerr << "[!] Unable to push the event into the queue.\n";
 					status = SessionStatus::queueClosed;
 					break;
 				}
@@ -84,7 +84,7 @@ namespace sentinelgrid::engine::app {
 			}
 			else {
 				const auto error = std::get<sentinelgrid::engine::DecodeError>(decodeRes);
-				std::cerr << "Decoding Error: " << sentinelgrid::engine::decodeErrorToString(error) << "\n";
+				std::cerr << "[!] Decoding Error: " << sentinelgrid::engine::decodeErrorToString(error) << "\n";
 				status = SessionStatus::decodingError;
 				break;
 			}

@@ -20,6 +20,7 @@
 #include <agent/sockets/tcp_client.h>
 #include <utilities/agent_options.h>
 #include <windows_agent_key_store.h>
+#include <windows_agent_sequence_store.h>
 
 int main(int argc, char* argv[]) {
 	AgentOptions options = { 0 };
@@ -80,32 +81,32 @@ int main(int argc, char* argv[]) {
 		goto cleanup;
 	}
 
-	const SecurityEvent events[] = {
-		{
-			options.agent_id,
-			1ULL,
-			EVENT_LOGIN_FAILED
-		},
-
-		{
-			options.agent_id,
-			2ULL,
-			EVENT_LOGIN_FAILED
-		},
-
-		{
-			options.agent_id,
-			3ULL,
-			EVENT_LOGIN_FAILED
-		}
-	};
-
 	const uint32_t keyId = options.agent_id;
+	for (size_t i = 0; i < 3U; i++) {
+		
+		uint64_t sequence = 0U;
 
-	for (size_t i = 0; i < sizeof events / sizeof events[0]; i++) {
+		const AgentSequenceResult sequenceRes = reserveNextAgentSequence(options.agent_id, &sequence);
+
+		if (sequenceRes.status != AGENT_SEQUENCE_SUCCESS) {
+			fprintf(
+				stderr,
+				"[-] Unable to reserver sequence number. Error: %u",
+				(unsigned int)sequenceRes.native_error_code
+			);
+
+			goto cleanup;
+		}
+
+		const SecurityEvent event = {
+			options.agent_id,
+			sequence,
+			EVENT_LOGIN_FAILED
+		};
+
 		uint8_t packet[AUTHENTICATED_PACKET_SIZE] = { 0 };
 
-		if (!encodeAuthenticatedEvent(&events[i], keyId, agentKey, sizeof agentKey, packet)) {
+		if (!encodeAuthenticatedEvent(&event, keyId, agentKey, sizeof agentKey, packet)) {
 			fprintf(
 				stderr,
 				"Unable to encode authenticated packet.\n"
@@ -125,8 +126,8 @@ int main(int argc, char* argv[]) {
 
 		printf(
 			"Authenticated packet { type=%u; sequence=%llu } correctly sent.\n", 
-			(unsigned int)events[i].type, 
-			(unsigned long long)events[i].sequence_number
+			(unsigned int)event.type, 
+			(unsigned long long)event.sequence_number
 		);
 	}
 

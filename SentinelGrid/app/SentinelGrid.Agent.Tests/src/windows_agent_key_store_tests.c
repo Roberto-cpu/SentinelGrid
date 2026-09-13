@@ -65,10 +65,15 @@ static void resetCredential(uint8_t* loadedKey, size_t loadedKeySize, bool toDel
 
 /*
  * @brief Tests the loading of a existing valid credential
+ * 
+ * Checks if the system correclty loads a key from Windows Credential
+ * Manager.
+ * The test expects that the system returns an AGENT_KEY_LOAD_SUCCESS
+ * status
  */
 static void testLoadAgentKeyValidCredential(void)
 {
-	printf("[+] Testing valid agent key credential loading...\n");
+	printf("[+] Test valid agent key credential loading...\n");
 
 	uint8_t key[SENTINELGRID_AGENT_KEY_SIZE] = {
 		0x00, 0x01, 0x02, 0x03,
@@ -101,10 +106,12 @@ static void testLoadAgentKeyValidCredential(void)
  * 
  * Checks if the system raises an error when the agent tries
  * to load a not eixstent credential.
+ * The test expects that the system returns an AGENT_KEY_LOAD_NOT_FOUND
+ * status
  */
 static void testLoadAgentKeyMissingCredential(void)
 {
-	printf("[+] Testing credential load for missing credential...\n");
+	printf("[+] Test credential load for missing credential...\n");
 
 	uint8_t destination[SENTINELGRID_AGENT_KEY_SIZE] = { 0 };
 	AgentKeyLoadResult loadResult = loadAgentKey(TEST_CREDENTIAL_TARGET, destination, sizeof destination);
@@ -113,14 +120,52 @@ static void testLoadAgentKeyMissingCredential(void)
 	resetCredential(destination, sizeof destination, false);
 }
 
+/*
+ * @brief Tests the loading of an invalid size key
+ * 
+ * Checks if the system raises an error after the loading of a
+ * 31 bytes key. 
+ * The test expects that the system returns an AGENT_KEY_LOAD_INAVLID_SIZE
+ * status
+ */
 static void testLoadAgentKeyRejectsShortKey(void)
 {
-    /* Test implementation. */
+	printf("[+] Test loading too short key...\n");
+
+	uint8_t shortKey[SENTINELGRID_AGENT_KEY_SIZE - 1U] = { 0 };
+
+	if (!registerCredential(shortKey, sizeof shortKey))
+		return;
+
+	uint8_t destination[SENTINELGRID_AGENT_KEY_SIZE] = { 0 };
+	AgentKeyLoadResult result = loadAgentKey(TEST_CREDENTIAL_TARGET, destination, sizeof destination);
+
+	EXPECT_TRUE(result.status == AGENT_KEY_LOAD_INVALID_SIZE);
+	resetCredential(destination, sizeof destination, true);
 }
 
+/*
+ * @brief Tests the loading of an invalid size key
+ *
+ * Checks if the system raises an error after the loading of a
+ * 33 bytes key.
+ * The test expects that the system returns an AGENT_KEY_LOAD_INAVLID_SIZE
+ * status
+ */
 static void testLoadAgentKeyRejectsLongKey(void)
 {
-    /* Test implementation. */
+	printf("[+] Test loading too long key...\n");
+
+	uint8_t shortKey[SENTINELGRID_AGENT_KEY_SIZE + 1U] = { 0 };
+
+	if (!registerCredential(shortKey, sizeof shortKey))
+		return;
+
+	uint8_t destination[SENTINELGRID_AGENT_KEY_SIZE] = { 0 };
+	AgentKeyLoadResult result = loadAgentKey(TEST_CREDENTIAL_TARGET, destination, sizeof destination);
+
+	EXPECT_TRUE(result.status == AGENT_KEY_LOAD_INVALID_SIZE);
+	resetCredential(destination, sizeof destination, true);
 }
 
 void runWindowsAgentKeyStoreTests(void)
@@ -129,6 +174,6 @@ void runWindowsAgentKeyStoreTests(void)
 
     testLoadAgentKeyValidCredential();
     testLoadAgentKeyMissingCredential();
-    //testLoadAgentKeyRejectsShortKey();
-    //testLoadAgentKeyRejectsLongKey();
+    testLoadAgentKeyRejectsShortKey();
+    testLoadAgentKeyRejectsLongKey();
 }

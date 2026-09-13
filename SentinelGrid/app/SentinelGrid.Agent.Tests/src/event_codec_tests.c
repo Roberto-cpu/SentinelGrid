@@ -25,7 +25,7 @@
   * It checks known valid event types and verifies that invalid event types are rejected.
   */
 static void testEventTypeValidation(void) {
-	printf("[+] Testing event-type validation...\n");
+	printf("[+] Test event-type validation...\n");
 
 	EXPECT_TRUE(isValidEventType(EVENT_HEARTBEAT));
 	EXPECT_TRUE(isValidEventType(EVENT_LOGIN_FAILED));
@@ -43,7 +43,7 @@ static void testEventTypeValidation(void) {
  * and compares the original and decoded events for equality.
  */
 static void testSerializationRoundTrip(void) {
-	printf("[+] Testing serialiaztion round-trip...\n");
+	printf("[+] Test serialiaztion round-trip...\n");
 
 	SecurityEvent originalEvent = {
 		42U,
@@ -70,7 +70,7 @@ static void testSerializationRoundTrip(void) {
  * false when provided with invalid arguments.
  */
 static void testInvalidCodecArgument(void) {
-	printf("[+] Testing codec arguments validity checks...\n");
+	printf("[+] Test codec arguments validity checks...\n");
 
 	SecurityEvent event = {
 		1U,

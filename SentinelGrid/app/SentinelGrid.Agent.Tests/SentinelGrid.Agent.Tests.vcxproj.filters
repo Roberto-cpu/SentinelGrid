@@ -33,9 +33,6 @@
     <ClCompile Include="src\packet_codec_tests.c">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="src\authenticated_packet_tests.c">
-      <Filter>File di origine</Filter>
-    </ClCompile>
     <ClCompile Include="src\windows_agent_key_store_tests.c">
       <Filter>File di origine</Filter>
     </ClCompile>
@@ -54,9 +51,6 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="libs\windows_agent_key_store_tests.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="libs\authenticated_packet_tests.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

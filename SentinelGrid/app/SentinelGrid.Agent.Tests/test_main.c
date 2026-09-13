@@ -31,7 +31,7 @@
  * @return EXIT_SUCCESS if all tests pass, EXIT_FAILURE otherwise.
  */
 int main(void) {
-	printf("SentinelGrig Agent Tests start\n\n");
+	printf("SentinelGrig Agent Tests start\n");
 
 	runEventCodecTests();
 	runBufferCodecTests();
@@ -39,5 +39,5 @@ int main(void) {
 	runWindowsAgentKeyStoreTests();
 
 	printTestSummary();
-	return EXIT_SUCCESS;
+	return g_failureCount == 0U ? EXIT_SUCCESS : EXIT_FAILURE;
 }

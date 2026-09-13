@@ -171,7 +171,6 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\authenticated_packet_tests.c" />
     <ClCompile Include="src\buffer_codec_tests.c" />
     <ClCompile Include="src\event_codec_tests.c" />
     <ClCompile Include="src\packet_codec_tests.c" />
@@ -188,7 +187,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="libs\authenticated_packet_tests.h" />
     <ClInclude Include="libs\buffer_codec_tests.h" />
     <ClInclude Include="libs\event_codec_tests.h" />
     <ClInclude Include="libs\packet_codec_tests.h" />

@@ -27,7 +27,7 @@
   * and decoded events for equality.
   */
 static void testPacketRoundTrip(void) {
-	printf("[+] Testing packet encoding round-trip...\n");
+	printf("[+] Test packet encoding round-trip...\n");
 
 	SecurityEvent heartbeat = {
 		1U,
@@ -54,7 +54,7 @@ static void testPacketRoundTrip(void) {
  * after attempting to decode an invalid packet.
  */
 static void testInvalidPacketHeader(void) {
-	printf("[+] Testing invalid packet header...\n");
+	printf("[+] Test invalid packet header...\n");
 
 	SecurityEvent heartbeat = {
 		1U,
@@ -123,7 +123,7 @@ static void testInvalidPacketHeader(void) {
  * for all truncated packet sizes.
  */
 static void testTruncatedPacket(void) {
-	printf("[+] Testing truncated packet decoding...\n");
+	printf("[+] Test truncated packet decoding...\n");
 
 	SecurityEvent heartbeat = {
 		1U,
@@ -148,7 +148,7 @@ static void testTruncatedPacket(void) {
  * that the computed MAC is correct.
  */
 static void testHMAC_SHA256Encoding() {
-	printf("[+] Testing MAC SHA-256 encoding...\n");
+	printf("[+] Test MAC SHA-256 encoding...\n");
 
 	uint8_t key[] = {
 		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,

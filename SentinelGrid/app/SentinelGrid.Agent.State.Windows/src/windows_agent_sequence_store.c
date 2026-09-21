@@ -39,12 +39,12 @@ AgentSequenceResult reserveNextAgentSequence(uint32_t agentId, uint64_t* destina
 		goto invalid_param;
 	}
 
+	*destination = 0U;
+
 	if (agentId == 0U) {
 		printf("[-] Agent ID must be a non-zero value.\n");
 		goto invalid_param;
 	}
-
-	*destination = 0U;
 
 	const int mutexNameLength = swprintf_s(
 		mutexName,

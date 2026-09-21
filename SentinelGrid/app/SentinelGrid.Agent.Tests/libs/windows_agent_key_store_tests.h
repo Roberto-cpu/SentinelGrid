@@ -4,8 +4,8 @@
  * @file windows_agent_key_store_tests.h
  * @brief This header file defines the container function for the windows agent key store related tests
  *
- * @note The of the runWindowsAgentKeyStoreTests function is expected to be provided in a correspoding
- *			source file (e.g., windows_agent_key_store_tests.c)
+ * @note The implementation of the runWindowsAgentKeyStoreTests function is expected to be provided in a 
+ *       correspoding source file (e.g., windows_agent_key_store_tests.c)
  *
  * @author Roberto Garzone
  * @date 2026-09-12

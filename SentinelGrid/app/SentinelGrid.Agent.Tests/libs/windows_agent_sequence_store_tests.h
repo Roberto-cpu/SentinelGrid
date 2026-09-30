@@ -19,6 +19,11 @@ extern "C" {
 #define TEST_AGENT_TWO				  0xFFFF0002U
 #define TEST_AGENT_INVALID_REG_TYPE	  0xFFFF0003U
 #define TEST_AGENT_EXHAUSTED_SEQUENCE 0xFFFF0004U
+#define TEST_AGENT_CONCURRENCY		  0xFFFF0005U
+
+#define THREAD_COUNT			8U
+#define RESERVATION_PER_THREAD	100U
+#define TOTAL_RESERVATION (RESERVATION_PER_THREAD * THREAD_COUNT)
 
 	/** @brief The windows agent sequence store tests related container */
 	void runWindowsAgentSequenceStoreTests(void);

@@ -32,7 +32,7 @@
  * @return EXIT_SUCCESS if all tests pass, EXIT_FAILURE otherwise.
  */
 int main(void) {
-	printf("[Test-Suite] SentinelGrig Agent Tests start\n");
+	printf("[Test-Suite] SentinelGrig Agent Unit Tests start\n");
 
 	runEventCodecTests();
 	runBufferCodecTests();

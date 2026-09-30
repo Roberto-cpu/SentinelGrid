@@ -15,8 +15,64 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test_main.cpp">
+    <ClCompile Include="src\test_main.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="src\test_framework.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\suite\agent_key_registry_tests.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\suite\authenticated_packet_tests.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\suite\bounded_queue_tests.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\suite\control_plane_encoder_tests.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\suite\failed_login_rules_tests.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\suite\packet_decoder_tests.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\suite\windows_credentials_store_tests.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\suite\shutdown_coordinator_tests.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\tests\test_framework.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\tests\suites\packet_decoder_tests.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\tests\suites\bounded_queue_tests.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\tests\suites\failed_login_rules_tests.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\tests\suites\control_plane_encoder_tests.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\tests\suites\authenticated_packet_tests.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\tests\suites\agent_key_registry_tests.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\tests\suites\windows_credentials_store_tests.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\tests\suites\shutdown_coordinator_tests.hpp">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
